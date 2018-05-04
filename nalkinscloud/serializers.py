@@ -3,11 +3,8 @@
 from rest_framework import serializers
 
 
-# Setup view serializers
-
 class RegistrationSerializer(serializers.Serializer):
     client_secret = serializers.CharField(required=True, max_length=256)
-    username = serializers.CharField(required=True, max_length=100)
     email = serializers.CharField(required=True, max_length=256)
     password = serializers.CharField(required=True, max_length=100)
     first_name = serializers.CharField(required=True, max_length=100)
@@ -33,9 +30,43 @@ class ResetPasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(required=True, max_length=256)
 
 
-class SetScheduledJobSerializer(serializers.Serializer):
+class StartDateTimeSerializer(serializers.Serializer):
+    start_date_time_selected = serializers.BooleanField(required=True)
+    start_date_time_values = serializers.CharField(required=True, max_length=256)
+
+
+class EndDateTimeSerializer(serializers.Serializer):
+    end_date_time_selected = serializers.BooleanField(required=True)
+    end_date_time_values = serializers.CharField(required=True, max_length=256)
+
+
+class RepeatedDaysSerializer(serializers.Serializer):
+    sunday = serializers.BooleanField(required=True)
+    monday = serializers.BooleanField(required=True)
+    tuesday = serializers.BooleanField(required=True)
+    wednesday = serializers.BooleanField(required=True)
+    thursday = serializers.BooleanField(required=True)
+    friday = serializers.BooleanField(required=True)
+    saturday = serializers.BooleanField(required=True)
+
+
+
+class RepeatedJobSerializer(serializers.Serializer):
+    repeat_job = serializers.BooleanField(required=True)
+    repeat_days = RepeatedDaysSerializer(source='*')
+
+
+class AppParamsSerializer(serializers.Serializer):
     device_id = serializers.CharField(required=True, max_length=256)
-    # TODO Check serializer for this API, as it contains more complex JSON Array
+    topic = serializers.CharField(required=True, max_length=256)
+
+
+class SetScheduledJobSerializer(serializers.Serializer):
+    app_params = AppParamsSerializer(required=True, source='*')
+    repeated_job = RepeatedJobSerializer(required=True, source='*')
+    job_action = serializers.BooleanField(required=True)
+    start_date_time = StartDateTimeSerializer(required=True, source='*')
+    end_date_time = EndDateTimeSerializer(required=True, source='*')
 
 
 class DelScheduledJobSerializer(serializers.Serializer):

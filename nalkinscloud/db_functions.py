@@ -1,79 +1,18 @@
-from django.contrib.auth.models import User
-from django.conf import settings
-import datetime
-import MySQLdb
 
-now = datetime.datetime.now()
-
-
-class DjangoDB(object):
-    _db_connection = None
-    _db_cur = None
-
-    def __init__(self):
-        self._db_connection = MySQLdb.connect(settings.DATABASES['default']['HOST'],
-                                              settings.DATABASES['default']['USER'],
-                                              settings.DATABASES['default']['PASSWORD'],
-                                              'django_android')
-        self._db_cur = self._db_connection.cursor()
-
-    def query(self, query, params):
-        self._db_cur.execute(query, params)
-        return self._db_cur.fetchall()
-
-    def commit(self):
-        self._db_connection.commit()
-
-    def __del__(self):
-        self._db_connection.close()
-
-
-class MosquittoDB(object):
-    _db_connection = None
-    _db_cur = None
-
-    def __init__(self):
-        self._db_connection = MySQLdb.connect(settings.DATABASES['default']['HOST'],
-                                              settings.DATABASES['default']['USER'],
-                                              settings.DATABASES['default']['PASSWORD'],
-                                              'mosquitto')
-        self._db_cur = self._db_connection.cursor()
-
-    def query(self, query, params):
-        self._db_cur.execute(query, params)
-        return self._db_cur.fetchall()
-
-    def commit(self):
-        self._db_connection.commit()
-
-    def __del__(self):
-        self._db_connection.close()
-
-
-# Built in function on django
-def is_username_exists(username):
-    if User.objects.filter(username=username).exists():
-        return True
-    return False
-
-
-# Built in function on django
-def is_email_exists(email):
-    if User.objects.filter(email=email).exists():
-        return True
-    return False
-
-
-# Insert new customer into customers table in mosquitto
+'''# Insert new customer into customers table in mosquitto
 def insert_new_customer_to_mosquitto(user_id, email):
     db = MosquittoDB()
     sql = 'INSERT INTO customers ' \
           '(user_id, email, is_active, country_id, registration_ip, ' \
           'date_created, last_update_date, last_login, last_login_ip) ' \
-          'VALUES (%s, %s, 1, null, null, null, null, null, null)'
+          'VALUES (%s, %s, 0, null, null, null, null, null, null)'
     params = [user_id, email]
     db.query(sql, params)
     db.commit()
+
+
+def get_client_secret_web_db2(client_secret):
+    OAuthApp.object.filter(client_secret=client_secret)
 
 
 def get_client_secret_web_db(client_secret):
@@ -201,4 +140,4 @@ def get_device_name_by_id(device_id):
           'FROM customer_devices ' \
           'WHERE device_id=%s'
     params = [device_id]
-    return db.query(sql, params)
+    return db.query(sql, params)'''
