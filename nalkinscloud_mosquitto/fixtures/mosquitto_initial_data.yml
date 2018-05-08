@@ -1,0 +1,86 @@
+
+#################################################################################
+# Do not change comment for simulator, they use ansible playbook as indicators!!!
+#################################################################################
+
+### Device Types Set ###
+- model: nalkinscloud_mosquitto.DeviceType
+  pk: 1
+  fields:
+    type: service
+
+- model: nalkinscloud_mosquitto.DeviceType,
+  pk: 2,
+  fields:
+    type: user
+
+- model: nalkinscloud_mosquitto.DeviceType,
+  pk: 3,
+  fields:
+    type: distillery
+
+- model: nalkinscloud_mosquitto.DeviceType,
+  pk: 4,
+  fields:
+    type: magnet
+
+- model: nalkinscloud_mosquitto.DeviceType,
+  pk: 5,
+  fields:
+      type: dht
+
+- model: nalkinscloud_mosquitto.DeviceType,
+  pk: 6,
+  fields:
+    type: switch
+
+### Device Models Set ###
+- model: nalkinscloud_mosquitto.DeviceModel,
+  pk: 1,
+  fields:
+    model: esp8266
+
+- model: nalkinscloud_mosquitto.DeviceModel,
+  pk: 2,
+  fields:
+    model: application
+
+- model: nalkinscloud_mosquitto.DeviceModel,
+  pk: 3,
+  fields:
+    model: service
+
+### Test Simulators ###
+- model: nalkinscloud_mosquitto.Devices
+  pk: 1,
+  fields:
+    device_id: test_dht_simulator
+    password: nalkinscloud # dht simulator password
+    is_enabled: 1
+    model: 1 # Foreign key of DeviceModel (esp8266)
+    type: 5 # Foreign key of DeviceType (dht)
+
+- model: nalkinscloud_mosquitto.Devices
+  pk: 2,
+  fields:
+    device_id: test_switch_simulate
+    password: nalkinscloud # switch simulator password
+    is_enabled: 1
+    model: 1 # Foreign key of DeviceModel (esp8266)
+    type: 6 # Foreign key of DeviceType (switch)
+
+- model: nalkinscloud_mosquitto.AccessList
+  pk: 1,
+  fields:
+    device: test_dht_simulator # Foreign key of DeviceModel (test_dht_simulator)
+    topic: test_dht_simulator/#
+    rw: 2
+    is_enabled: 1
+
+- model: nalkinscloud_mosquitto.AccessList
+  pk: 2,
+  fields:
+    device: test_switch_simulate # Foreign key of DeviceModel (test_dht_simulator)
+    topic: test_switch_simulate/#
+    rw: 2
+    is_enabled: 1
