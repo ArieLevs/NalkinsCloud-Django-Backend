@@ -63,7 +63,7 @@
 - model: nalkinscloud_mosquitto.Devices
   pk: 2,
   fields:
-    device_id: test_switch_simulate
+    device_id: test_switch_simulator
     password: nalkinscloud # switch simulator password
     is_enabled: 1
     model: 1 # Foreign key of DeviceModel (esp8266)
@@ -80,7 +80,7 @@
 - model: nalkinscloud_mosquitto.AccessList
   pk: 2,
   fields:
-    device: test_switch_simulate # Foreign key of DeviceModel (test_dht_simulator)
-    topic: test_switch_simulate/#
+    device: test_switch_simulator # Foreign key of DeviceModel (test_dht_simulator)
+    topic: test_switch_simulator/#
     rw: 2
     is_enabled: 1
