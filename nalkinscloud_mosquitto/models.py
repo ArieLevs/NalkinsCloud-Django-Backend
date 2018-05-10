@@ -8,7 +8,7 @@ from django.contrib.auth.hashers import make_password
 
 class DeviceType(models.Model):
     type = models.CharField(_('Device Type Name'), max_length=32, null=False, primary_key=True)
-    date_created = models.DateTimeField(_('Date Created'), default=now)
+    date_created = models.DateTimeField(_('Date Created'),  auto_now_add=True, blank=True)
 
     def __str__(self):
         return self.type
@@ -21,7 +21,7 @@ class DeviceType(models.Model):
 
 class DeviceModel(models.Model):
     model = models.CharField(_('Device Model Name'), max_length=32, null=False, primary_key=True)
-    date_created = models.DateTimeField(_('Date Created'), default=now)
+    date_created = models.DateTimeField(_('Date Created'),  auto_now_add=True, blank=True)
 
     def __str__(self):
         return self.model
@@ -68,7 +68,7 @@ class CustomerDevice(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     device_id = models.ForeignKey(Devices, on_delete=models.CASCADE)
     device_name = models.CharField(_('Device Name'), max_length=32, null=False)
-    date_created = models.DateTimeField(_('Date Created'), auto_now_add=True, blank=True)
+    date_created = models.DateTimeField(_('Date Created'),  auto_now_add=True, blank=True)
 
     def __str__(self):
         return 'Device of customer: ' + self.user_id.email
@@ -94,7 +94,7 @@ class AccessList(models.Model):
                                      validators=[MaxValueValidator(1), MinValueValidator(0)],
                                      null=False,
                                      default=1)
-    date_created = models.DateTimeField(_('Date Created'), auto_now_add=True, blank=True)
+    date_created = models.DateTimeField(_('Date Created'),  auto_now_add=True, blank=True)
     last_update_date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -113,7 +113,7 @@ class Message(models.Model):
     topic = models.CharField(_('Message Topic'), max_length=256, null=False)
     message = models.CharField(_('Message Body'), max_length=256, null=False)
     qos = models.IntegerField(_('QOS'), validators=[MaxValueValidator(1), MinValueValidator(0)], null=False, default=1)
-    date_created = models.DateTimeField(_('Date Created'), auto_now_add=True)
+    date_created = models.DateTimeField(_('Date Created'),  auto_now_add=True, blank=True)
 
     def __str__(self):
         return 'Message of device: ' + self.device.device_id

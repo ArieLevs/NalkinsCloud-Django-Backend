@@ -1,4 +1,4 @@
-# For reading outsource file output
+
 from django.contrib.auth.hashers import make_password
 
 from nalkinscloud.models import User
