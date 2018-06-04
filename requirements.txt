@@ -1,0 +1,7 @@
+django
+djangorestframework
+django-oauth-toolkit
+mysqlclient
+django-ipware
+apscheduler
+PyYAML
