@@ -1,0 +1,103 @@
+
+#################################################################################
+# Do not change comment for simulator, they use ansible playbook as indicators!!!
+#################################################################################
+
+### Device Types Set ###
+- model: nalkinscloud_mosquitto.DeviceType
+  pk: 1
+  fields:
+    type: service
+    date_created: "2018-01-01 00:00:00"
+
+- model: nalkinscloud_mosquitto.DeviceType
+  pk: 2
+  fields:
+    type: user
+    date_created: "2018-01-01 00:00:00"
+
+- model: nalkinscloud_mosquitto.DeviceType
+  pk: 3
+  fields:
+    type: distillery
+    date_created: "2018-01-01 00:00:00"
+
+- model: nalkinscloud_mosquitto.DeviceType
+  pk: 4
+  fields:
+    type: magnet
+    date_created: "2018-01-01 00:00:00"
+
+- model: nalkinscloud_mosquitto.DeviceType
+  pk: 5
+  fields:
+    type: dht
+    date_created: "2018-01-01 00:00:00"
+
+- model: nalkinscloud_mosquitto.DeviceType
+  pk: 6
+  fields:
+    type: switch
+    date_created: "2018-01-01 00:00:00"
+
+### Device Models Set ###
+- model: nalkinscloud_mosquitto.DeviceModel
+  pk: 1
+  fields:
+    model: esp8266
+    date_created: "2018-01-01 00:00:00"
+
+- model: nalkinscloud_mosquitto.DeviceModel
+  pk: 2
+  fields:
+    model: application
+    date_created: "2018-01-01 00:00:00"
+
+- model: nalkinscloud_mosquitto.DeviceModel
+  pk: 3
+  fields:
+    model: service
+    date_created: "2018-01-01 00:00:00"
+
+### Test Simulators ###
+- model: nalkinscloud_mosquitto.Devices
+  pk: 1
+  fields:
+    device_id: test_dht_simulator
+    password: test_dht_simulator # dht simulator password
+    is_enabled: 1
+    model: esp8266 # Foreign key of DeviceModel
+    type: dht # Foreign key of DeviceType
+    date_created: "2018-01-01 00:00:00"
+    last_update_date: "2018-01-01 00:00:00"
+
+- model: nalkinscloud_mosquitto.Devices
+  pk: 2
+  fields:
+    device_id: test_switch_simulator
+    password: test_switch_simulator # switch simulator password
+    is_enabled: 1
+    model: esp8266 # Foreign key of DeviceModel
+    type: switch # Foreign key of DeviceType
+    date_created: "2018-01-01 00:00:00"
+    last_update_date: "2018-01-01 00:00:00"
+
+- model: nalkinscloud_mosquitto.AccessList
+  pk: 1
+  fields:
+    device: test_dht_simulator # Foreign key of DeviceModel (test_dht_simulator)
+    topic: test_dht_simulator/#
+    rw: 2
+    is_enabled: 1
+    date_created: "2018-01-01 00:00:00"
+    last_update_date: "2018-01-01 00:00:00"
+
+- model: nalkinscloud_mosquitto.AccessList
+  pk: 2
+  fields:
+    device: test_switch_simulator # Foreign key of DeviceModel (test_dht_simulator)
+    topic: test_switch_simulator/#
+    rw: 2
+    is_enabled: 1
+    date_created: "2018-01-01 00:00:00"
+    last_update_date: "2018-01-01 00:00:00"

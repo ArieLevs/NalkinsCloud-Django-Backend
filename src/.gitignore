@@ -1,0 +1,8 @@
+
+# Directories
+__pycache__
+.idea/
+migrations
+logs
+.DS_Store
+db.sqlite3

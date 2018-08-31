@@ -1,8 +1,26 @@
-NalkinsCloud-Django
-====================
+NalkinsCloud-Django-Backend
+===========================
 
 This is Django server code, implementing REST API to support [NalkinsCloud](https://github.com/ArieLevs/NalkinsCloud),
 The server will connect Android application to MQTT server and database.
+
+Install using Docker
+--------------------
+
+Create docker image   
+`docker build -t nalkinscloud/nalkinscloud-django .`  
+
+Optional:
+ - Tag image for private repo  
+    `docker tag nalkinscloud/nalkinscloud-django docker.nalkins.cloud/nalkinscloud/nalkinscloud-django`  
+ - Push the image to repository  
+    `docker push docker.nalkins.cloud/nalkinscloud/nalkinscloud-django:latest `
+
+The `env` param should be one of: `test` (sqlite), `alpha`, `prod`  
+This is done so the project can be later integrated into Jenkins
+
+Run the project inside a container using:  
+`docker run -it -p 8000:8000 nalkinscloud/nalkinscloud-django -p nalkinscloud-django`
 
 Installation
 ------------
@@ -17,8 +35,6 @@ then run `pip3.6 install Django`,
 Additional libraries needed for the code to work `pip3.6 install djangorestframework django-oauth-toolkit mysqlclient apscheduler django-ipware`  
 
 Define installation directory `INSTALL_DIR='$HOME'`, I'm using users home directory for this example
-
-
 
 Run `cd $INSTALL_DIR` and create a new project `django-admin startproject django_server`, enter the just created folder `cd $INSTALL_DIR/django_server`, 
 And clone NalkinsCloud-Django `git clone https://github.com/ArieLevs/NalkinsCloud-Django.git`.  

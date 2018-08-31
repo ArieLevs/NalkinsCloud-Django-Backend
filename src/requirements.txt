@@ -1,0 +1,12 @@
+# Make sure using python3 in order to install django 2.x and above
+django==2.0.5
+
+apscheduler
+djangorestframework
+django-oauth-toolkit
+mysqlclient
+django-ipware
+pytz
+PyYAML
+graypy # Graylog logger
+gunicorn
