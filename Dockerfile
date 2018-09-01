@@ -18,5 +18,5 @@ RUN chmod +x entrypoint.sh
 
 RUN chmod 755 -R /nalkinscloud
 
-#ENTRYPOINT ["sh", "/nalkinscloud/entrypoint.sh"]
-CMD ["gunicorn", "nalkinscloud_django.wsgi:application", "--log-level=DEBUG", "-b", "0.0.0.0:8000"]
+ENTRYPOINT ["sh", "/nalkinscloud/entrypoint.sh"]
+#CMD ["gunicorn", "nalkinscloud_django.wsgi:application", "--log-level=DEBUG", "-b", "0.0.0.0:8000"]

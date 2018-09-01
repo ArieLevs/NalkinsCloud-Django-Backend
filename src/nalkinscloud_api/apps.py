@@ -10,8 +10,8 @@ logger = logging.getLogger(PROJECT_NAME)
 class NalkinsCloudAPIConfig(AppConfig):
     name = 'nalkinscloud_api'
 
-    def ready(self):
-        logger.info("#################################\n"
-                    "Nalkiscloud API is up and running\n"
-                    "#################################")
-        pass
+    # def ready(self):
+    #     logger.info("#################################\n"
+    #                 "Nalkiscloud API is up and running\n"
+    #                 "#################################")
+    #     pass

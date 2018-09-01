@@ -2,7 +2,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ProcessPoolExecutor
 from nalkinscloud_api.functions import generate_random_16_char_string
 from nalkinscloud_django.settings import PROJECT_NAME
-from django.conf import settings
+
 # from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
 import logging

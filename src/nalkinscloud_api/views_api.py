@@ -4,10 +4,8 @@ from nalkinscloud_django.settings import PROJECT_NAME
 from nalkinscloud_api.scheduler import schedule_new_job, remove_job_by_id
 from nalkinscloud_mosquitto.functions import *
 from nalkinscloud_api.functions import *
-from nalkinscloud_api.models import User
-from ipware.ip import get_real_ip
 
-from nalkinscloud_api.models import EmailVerification
+from ipware.ip import get_real_ip
 
 # REST Framework
 from rest_framework.response import Response
@@ -16,9 +14,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 from django.contrib.auth.forms import PasswordResetForm
+from django.urls import reverse
+
+from nalkinscloud_django.settings import DOMAIN_NAME, EMAIL_HOST_USER
 
 # Import serializers
 from nalkinscloud_api.serializers import *
+
+# django_email_verifier
+from django_user_email_extension.models import *
 
 # Define logger
 logger = logging.getLogger(PROJECT_NAME)
@@ -97,8 +101,16 @@ class RegistrationView(APIView):
                     new_user.save()
 
                     logger.info("Setting up verification process")
-                    EmailVerification.objects.create(user=new_user)
+                    new_user.create_verification_email()
 
+                    subject = 'Verify your NalkinsCloud account'
+                    body = 'Follow this link to verify your account: ' + \
+                           DOMAIN_NAME + '%s' % reverse('verify_account',
+                                                        kwargs={'uuid': str(new_user.get_uuid_of_email())})
+
+                    new_user.send_verification_email(subject=subject,
+                                                     body=body,
+                                                     from_mail=EMAIL_HOST_USER)
                     message = 'success'
                     value = 'Registered!'
                     logger.info("success Registered!")

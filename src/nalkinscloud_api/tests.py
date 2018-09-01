@@ -1,7 +1,7 @@
 from django.test import TestCase, SimpleTestCase
 from django.test.client import RequestFactory
 
-from nalkinscloud_api.models import User
+from django_user_email_extension.models import User
 from nalkinscloud_api.functions import *
 
 

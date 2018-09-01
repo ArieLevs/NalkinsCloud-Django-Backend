@@ -1,7 +1,7 @@
 
 from django.contrib.auth.hashers import make_password
 
-from nalkinscloud_api.models import User
+from django_user_email_extension.models import User
 from oauth2_provider.models import Application
 
 # For password generating

@@ -6,12 +6,14 @@ ENVIRONMENT = os.environ.get('env', 'dev')
 if ENVIRONMENT == 'dev':
     DOMAIN_NAME = 'http://127.0.0.1:8000'
 elif ENVIRONMENT == 'alpha':
-    DOMAIN_NAME = 'https://alpha.nalkins.cloud'
+    DOMAIN_NAME = 'https://api-alpha.nalkins.cloud'
 elif ENVIRONMENT == 'prod':
-    DOMAIN_NAME = 'https://nalkins.cloud'
+    DOMAIN_NAME = 'https://api.nalkins.cloud'
 else:
-    DOMAIN_NAME = 'http://nalkinscloud.localhost'
-PROJECT_NAME = 'nalkinscloud'
+    DOMAIN_NAME = 'http://api.nalkinscloud.localhost'
+    FRONTEND_DOMAIN = 'http://api.nalkinscloud.localhost'
+
+PROJECT_NAME = 'nalkinscloud-api'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,7 +27,11 @@ if ENVIRONMENT == 'dev':
 else:
     DEBUG = False
 
-ALLOWED_HOSTS = ['nalkinscloud.localhost', 'alpha.nalkins.cloud', 'nalkins.cloud', 'www.nalkins.cloud', '127.0.0.1']
+ALLOWED_HOSTS = ['nalkinscloud.localhost',
+                 'api-alpha.nalkins.cloud',
+                 'api.nalkins.cloud',
+                 '127.0.0.1',
+                 '10.0.2.2']  # Android AVD IP for localhost
 
 # Application definition
 INSTALLED_APPS = [
@@ -42,6 +48,7 @@ INSTALLED_APPS = [
     'nalkinscloud_frontend',
     'nalkinscloud_mosquitto',
     'scheduler',
+    'django_user_email_extension',
 ]
 
 MIDDLEWARE = [
@@ -160,7 +167,7 @@ FIXTURE_DIRS = (
 ######################
 # Custom User Model
 ######################
-AUTH_USER_MODEL = 'nalkinscloud_api.User'
+AUTH_USER_MODEL = 'django_user_email_extension.User'
 
 ######################
 # EMAIL SETTINGS
@@ -171,6 +178,8 @@ EMAIL_HOST = os.environ.get('email_host')
 EMAIL_PORT = os.environ.get('email_port')
 EMAIL_HOST_USER = os.environ.get('email_username')
 EMAIL_HOST_PASSWORD = os.environ.get('email_password')
+
+DJANGO_EMAIL_VERIFIER_EXPIRE_TIME = 24  # In Hours
 
 # REDIS related settings
 REDIS_HOST = 'localhost'

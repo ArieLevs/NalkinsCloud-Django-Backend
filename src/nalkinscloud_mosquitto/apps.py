@@ -9,8 +9,8 @@ logger = logging.getLogger(PROJECT_NAME)
 class NalkinscloudMosquittoConfig(AppConfig):
     name = 'nalkinscloud_mosquitto'
 
-    def ready(self):
-        logger.info("###################################################\n"
-                    "Nalkiscloud Mosquitto Application is up and running\n"
-                    "###################################################")
-        pass
+    # def ready(self):
+    #     logger.info("###################################################\n"
+    #                 "Nalkiscloud Mosquitto Application is up and running\n"
+    #                 "###################################################")
+    #     pass

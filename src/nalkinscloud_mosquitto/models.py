@@ -1,9 +1,9 @@
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.utils.timezone import now
 from django.core.validators import MaxValueValidator, MinValueValidator
-from nalkinscloud_api.models import User
+
+from django_user_email_extension.models import User
 from django.contrib.auth.hashers import make_password
 
 
