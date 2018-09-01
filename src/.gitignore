@@ -1,5 +1,6 @@
 
 # Directories
+static
 __pycache__
 .idea/
 migrations
