@@ -44,6 +44,10 @@ Provide environment variables:
 ```bash
 env=dev
 
+# Domain details
+backend_domain=''
+frontend_domain=''
+
 # Database configs, not needed if 'env=dev'
 db_name=''
 db_user=''

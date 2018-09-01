@@ -5,6 +5,12 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
+
+    # Email verifications urls
+    url(r'^verify_account/(?P<uuid>[a-z0-9\-]+)/', views.verify_account, name='verify_account'),
+    url(r'^verify_account_successful/', views.verify_account_successful, name='verify_account_successful'),
+    url(r'^verify_account_failed/', views.verify_account_failed, name='verify_account_failed'),
+
     # REST API urls
     url(r'^register/', views_api.RegistrationView.as_view(), name='register'),
     url(r'^health_check/', views_api.HealthCheckView.as_view(), name='health_check'),  # Auth require

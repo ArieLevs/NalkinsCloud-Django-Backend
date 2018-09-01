@@ -1,17 +1,10 @@
 
 import os
 
-ENVIRONMENT = os.environ.get('env', 'dev')
+ENVIRONMENT = os.environ.get('environment', 'dev')
 
-if ENVIRONMENT == 'dev':
-    DOMAIN_NAME = 'http://127.0.0.1:8000'
-elif ENVIRONMENT == 'alpha':
-    DOMAIN_NAME = 'https://api-alpha.nalkins.cloud'
-elif ENVIRONMENT == 'prod':
-    DOMAIN_NAME = 'https://api.nalkins.cloud'
-else:
-    DOMAIN_NAME = 'http://api.nalkinscloud.localhost'
-    FRONTEND_DOMAIN = 'http://api.nalkinscloud.localhost'
+BACKEND_DOMAIN = os.environ.get('backend_domain', 'http://127.0.0.1:8000')
+FRONTEND_DOMAIN = os.environ.get('frontend_domain', 'http://127.0.0.1:8000')
 
 PROJECT_NAME = 'nalkinscloud-api'
 

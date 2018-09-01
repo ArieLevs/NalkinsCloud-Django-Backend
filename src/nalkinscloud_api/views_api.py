@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 from django.contrib.auth.forms import PasswordResetForm
 from django.urls import reverse
 
-from nalkinscloud_django.settings import DOMAIN_NAME, EMAIL_HOST_USER
+from nalkinscloud_django.settings import FRONTEND_DOMAIN, EMAIL_HOST_USER
 
 # Import serializers
 from nalkinscloud_api.serializers import *
@@ -105,8 +105,8 @@ class RegistrationView(APIView):
 
                     subject = 'Verify your NalkinsCloud account'
                     body = 'Follow this link to verify your account: ' + \
-                           DOMAIN_NAME + '%s' % reverse('verify_account',
-                                                        kwargs={'uuid': str(new_user.get_uuid_of_email())})
+                           FRONTEND_DOMAIN + '%s' % reverse('verify_account',
+                                                            kwargs={'uuid': str(new_user.get_uuid_of_email())})
 
                     new_user.send_verification_email(subject=subject,
                                                      body=body,
