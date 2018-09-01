@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'oauth2_provider',
     'rest_framework',
     'nalkinscloud_api',
-    'nalkinscloud_frontend',
     'nalkinscloud_mosquitto',
     'scheduler',
     'django_user_email_extension',

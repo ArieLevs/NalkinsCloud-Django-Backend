@@ -1,8 +1,10 @@
 from django.conf.urls import url
 
 from . import views_api
+from . import views
 
 urlpatterns = [
+    url(r'^$', views.index, name='index'),
     # REST API urls
     url(r'^register/', views_api.RegistrationView.as_view(), name='register'),
     url(r'^health_check/', views_api.HealthCheckView.as_view(), name='health_check'),  # Auth require
