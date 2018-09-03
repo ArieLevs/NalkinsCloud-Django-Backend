@@ -20,7 +20,7 @@ if ENVIRONMENT == 'dev':
 else:
     DEBUG = False
 
-ALLOWED_HOSTS = ['nalkinscloud.localhost',
+ALLOWED_HOSTS = ['api.nalkinscloud.localhost',
                  'api-alpha.nalkins.cloud',
                  'api.nalkins.cloud',
                  '127.0.0.1',
