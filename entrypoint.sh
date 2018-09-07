@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /nalkinscloud
+cd /nalkinscloud-api
 
 echo Migrate Models
 python3.6 manage.py makemigrations

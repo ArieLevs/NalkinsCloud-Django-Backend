@@ -1,7 +1,7 @@
 import logging
 import datetime
 
-from nalkinscloud_django.settings import BASE_DIR, PROJECT_NAME
+from nalkinscloud_django.settings import BASE_DIR, PROJECT_NAME, VERSION
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 
@@ -20,6 +20,8 @@ context = {'project_name': 'NalkinsCloud',
 def index(request):
     default_logger.info("index request at: " + str(datetime.datetime.now()))
     default_logger.info(request)
+
+    context.update({'version': VERSION})
 
     return render(
         request,
