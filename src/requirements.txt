@@ -1,5 +1,5 @@
 # Make sure using python3 in order to install django 2.x and above
-django==2.1.0
+django==2.1.1
 
 django-user-email-extension
 
