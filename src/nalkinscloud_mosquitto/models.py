@@ -7,6 +7,14 @@ from django_user_email_extension.models import User
 from django.contrib.auth.hashers import make_password
 
 
+class DeviceTypeManager(models.Manager):
+
+    def create_device_type(self, type_name):
+        if not type_name:
+            raise ValueError('Device type is mandatory')
+        return self.create(type=type_name)
+
+
 class DeviceType(models.Model):
     type = models.CharField(_('Device Type Name'), max_length=32, null=False, primary_key=True)
     date_created = models.DateTimeField(_('Date Created'),  auto_now_add=True, blank=True)
@@ -18,6 +26,16 @@ class DeviceType(models.Model):
         verbose_name = _('device_type')
         verbose_name_plural = _('device_type')
         db_table = 'device_type'
+
+    objects = DeviceTypeManager()
+
+
+class DeviceModelManager(models.Manager):
+
+    def create_device_model(self, model_name):
+        if not model_name:
+            raise ValueError('Device Model is mandatory')
+        return self.create(model=model_name)
 
 
 class DeviceModel(models.Model):
@@ -31,6 +49,8 @@ class DeviceModel(models.Model):
         verbose_name = _('device_model')
         verbose_name_plural = _('device_model')
         db_table = 'device_model'
+
+    objects = DeviceModelManager()
 
 
 class Devices(models.Model):

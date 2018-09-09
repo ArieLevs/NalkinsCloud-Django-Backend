@@ -3,7 +3,7 @@
 cd /nalkinscloud-api
 
 echo Migrate Models
-python3.6 manage.py makemigrations
+#python3.6 manage.py makemigrations
 python3.6 manage.py migrate
 
 #echo Collect static files
