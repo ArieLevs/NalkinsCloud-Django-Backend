@@ -572,7 +572,7 @@ class UpdateMQTTUserPassView(APIView):
         logger.info("Current logged in user: " + str(email) + " ID is: " + str(user_id))
 
         # If all passed OK, hash the token, and update customer "device" pass
-        hashed_pass = hash_pbkdf2_sha256_password(token)
+        hashed_pass = hash_pbkdf2_sha256_password(str(token))
         logger.info("Password has been hashed: " + hashed_pass)
         update_device_pass_mosquitto_db(email, token)
 

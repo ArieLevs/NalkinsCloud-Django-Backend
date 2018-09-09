@@ -188,12 +188,12 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Jerusalem'
 CELERY_BEAT_SCHEDULE = {}
 
-GRAYLOG_HOST = os.environ.get('graylog_host')
-GRAYLOG_PORT = os.environ.get('graylog_port', 12201)
-
 ######################
 # LOGGING SETTINGS
 ######################
+GRAYLOG_HOST = os.environ.get('graylog_host')
+GRAYLOG_PORT = os.environ.get('graylog_port', 12201)
+
 if ENVIRONMENT != 'dev':
     LOGGING = {
         'version': 1,

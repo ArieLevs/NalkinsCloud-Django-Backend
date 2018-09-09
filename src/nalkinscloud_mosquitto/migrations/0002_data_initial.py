@@ -1,5 +1,6 @@
 from django.db import migrations
 from nalkinscloud_mosquitto.models import DeviceType, DeviceModel, Devices, AccessList
+from nalkinscloud_django.settings import ENVIRONMENT
 
 
 def create_device_types(apps, schema_editor):
@@ -17,32 +18,34 @@ def create_device_models(apps, schema_editor):
 
 
 def create_devices(apps, schema_editor):
-    devices_list = [{'device_id': 'test_switch_simulator',
-                     'password': 'nalkinscloud',
-                     'model': 'esp8266',
-                     'type': 'switch'},
-                    {'device_id': 'test_dht_simulator',
-                     'password': 'nalkinscloud',
-                     'model': 'esp8266',
-                     'type': 'dht'}]
-    for device in devices_list:
-        Devices.objects.create(device_id=device['device_id'],
-                               password=device['password'],
-                               model=DeviceModel.objects.get(model=device['model']),
-                               type=DeviceType.objects.get(type=device['type']),
-                               is_enabled=1)
+    if ENVIRONMENT != 'production':
+        devices_list = [{'device_id': 'test_switch_simulator',
+                         'password': 'nalkinscloud',
+                         'model': 'esp8266',
+                         'type': 'switch'},
+                        {'device_id': 'test_dht_simulator',
+                         'password': 'nalkinscloud',
+                         'model': 'esp8266',
+                         'type': 'dht'}]
+        for device in devices_list:
+            Devices.objects.create(device_id=device['device_id'],
+                                   password=device['password'],
+                                   model=DeviceModel.objects.get(model=device['model']),
+                                   type=DeviceType.objects.get(type=device['type']),
+                                   is_enabled=1)
 
 
 def create_acls(apps, schema_editor):
-    acl_list = [{'device': 'test_switch_simulator',
-                 'topic': 'test_topic'},
-                {'device': 'test_dht_simulator',
-                 'topic': 'test_topic'}]
-    for acl in acl_list:
-        AccessList.objects.create(device=Devices.objects.get(device_id=acl['device']),
-                                  topic=acl['topic'],
-                                  rw=2,
-                                  is_enabled=1)
+    if ENVIRONMENT != 'production':
+        acl_list = [{'device': 'test_switch_simulator',
+                     'topic': 'test_switch_simulator/#'},
+                    {'device': 'test_dht_simulator',
+                     'topic': 'test_dht_simulator/#'}]
+        for acl in acl_list:
+            AccessList.objects.create(device=Devices.objects.get(device_id=acl['device']),
+                                      topic=acl['topic'],
+                                      rw=2,
+                                      is_enabled=1)
 
 
 class Migration(migrations.Migration):
