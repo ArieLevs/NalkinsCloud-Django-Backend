@@ -1,0 +1,54 @@
+version: '3.3'
+services:
+
+  nalkinscloud-backend:
+    hostname: nalkinscloud-api
+    image: nalkinscloud-django-backend:latest
+    environment:
+      environment: ${ENVIRONMENT}
+      django_secret_key: /run/secrets/nalkinscloud_api_secret_key
+      db_name: ${DB_NAME}
+      db_user: /run/secrets/nalkinscloud_api_db_user
+      db_pass: /run/secrets/nalkinscloud_api_db_pass
+      db_host: ${DB_HOST}
+
+      version: ${VERSION}
+      backend_domain: https://api-alpha.nalkins.cloud
+      frontend_domain: https://alpha.nalkins.cloud
+      graylog_host: ${GRAYLOG_HOST}
+      graylog_port: ${GRAYLOG_PORT}
+
+      email_username: /run/secrets/nalkinscloud_api_email_username
+      email_password: /run/secrets/nalkinscloud_api_email_password
+      email_host: ${EMAIL_HOST}
+      email_port: ${EMAIL_PORT}
+    secrets:
+      - nalkinscloud_api_db_user
+      - nalkinscloud_api_db_pass
+      - nalkinscloud_api_secret_key
+      - nalkinscloud_api_email_username
+      - nalkinscloud_api_email_password
+    volumes:
+      - ${STATIC_FILES_PATH}:/static/
+    ports:
+      - "8000:8000"
+    deploy:
+     replicas: 1
+     resources:
+      limits:
+        memory: ${MEMORY_LIMIT}
+     update_config:
+       parallelism: 1
+       delay: 5s
+
+secrets:
+  nalkinscloud_api_db_user:
+    external: true
+  nalkinscloud_api_db_pass:
+    external: true
+  nalkinscloud_api_secret_key:
+    external: true
+  nalkinscloud_api_email_username:
+    external: true
+  nalkinscloud_api_email_password:
+    external: true

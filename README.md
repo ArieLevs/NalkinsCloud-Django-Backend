@@ -4,26 +4,59 @@ NalkinsCloud-Django-Backend
 This is Django server code, implementing REST API to support [NalkinsCloud](https://github.com/ArieLevs/NalkinsCloud),
 The server will connect Android application to MQTT server and database.
 
-Install using Docker
---------------------
-
 Create docker image   
-`docker build -t nalkinscloud/nalkinscloud-django .`  
+`docker build -t nalkinscloud/nalkinscloud-django-backend .`  
 
 Optional:
  - Tag image for private repo  
-    `docker tag nalkinscloud/nalkinscloud-django docker.nalkins.cloud/nalkinscloud/nalkinscloud-django`  
+    `docker tag nalkinscloud/nalkinscloud-django docker.nalkins.cloud/nalkinscloud/nalkinscloud-django-backend`  
  - Push the image to repository  
-    `docker push docker.nalkins.cloud/nalkinscloud/nalkinscloud-django:latest `
+    `docker push docker.nalkins.cloud/nalkinscloud/nalkinscloud-django-backend:latest`
 
-The `env` param should be one of: `dev` (sqlite), `alpha`, `prod`  
-This is done so the project can be later integrated to CI/CD processes.
 
-Run the project inside a container using:  
-`docker run -it -p 8000:8000 nalkinscloud/nalkinscloud-django -p nalkinscloud-django`
+Install using Kubernetes
+------------------------
+Follow instruction in this [repository](https://github.com/ArieLevs/Kubernetes-Helm-Charts)
 
-Installation
-------------
+Install using Docker
+--------------------
+
+Export env vars and deploy:
+```bash
+django_secret_key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 50 | head -n 1)
+
+cat << EOF > .env
+environment=
+django_secret_key=${django_secret_key}
+db_name=
+db_user=
+db_pass=
+db_host=
+
+version=
+backend_domain=
+frontend_domain=
+graylog_host=
+graylog_port=
+
+email_username=
+email_password=
+email_host=
+email_port=
+EOF
+
+docker run -itd \
+    --env-file .env \
+    -p 8000:8000 \
+    nalkinscloud-django-backend:latest \
+    --name nalkinscloud-django-backend
+```
+- Once deployed, make sure to serve port 8000 using nginx / apache  
+  Kubernetes installation already takes care of that
+
+
+Non containerised installation
+------------------------------
 Based on: CentOS Linux 7 Kernel: Linux 3.10.0-693.5.2.el7.x86_64  
 **The server will be installed as a dependency for [NalkinsCloud](https://github.com/ArieLevs/NalkinsCloud).**
 
