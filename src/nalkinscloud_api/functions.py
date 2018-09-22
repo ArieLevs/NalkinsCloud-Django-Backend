@@ -18,15 +18,12 @@ def build_json_response(status, value):
 
     :param status: string
     :param value: string
-    :return: json array, or False is one of the params is not string
+    :return: json array
     """
-    if isinstance(status, str) and isinstance(value, str):
-        return {
-            'status': status,
-            'message': value
-        }
-    else:
-        return False
+    return {
+        'status': status,
+        'message': value
+    }
 
 
 def generate_user_name(first_name, last_name):
@@ -37,12 +34,9 @@ def generate_user_name(first_name, last_name):
 
     :param first_name: string users first name
     :param last_name: string users last name
-    :return: string Random generated username, or False if one of params is not string
+    :return: string Random generated username
     """
-    if isinstance(first_name, str) and isinstance(last_name, str):
-        return first_name + '.' + last_name + '.' + generate_random_8_char_string()
-    else:
-        return False
+    return first_name + '.' + last_name + '.' + generate_random_8_char_string()
 
 
 def generate_random_8_char_string():
@@ -72,12 +66,9 @@ def hash_pbkdf2_sha256_password(password):
     return of: pbkdf2_sha256$100000$Svjk1keU9azH$pxoHBlU4LkAItt6Y5gkeAB1gIrFOePjOxiKozh6zhSI=
 
     :param password: string
-    :return: hashed password, or False if param is not string
+    :return: hashed password
     """
-    if isinstance(password, str):
-        return make_password(password, salt=None, hasher='pbkdf2_sha256')
-    else:
-        return False
+    return make_password(password, salt=None, hasher='pbkdf2_sha256')
 
 
 def get_utc_datetime(local_date):
@@ -99,12 +90,9 @@ def is_username_exists(username):
     Check if username exist in 'User' model
 
     :param username: string
-    :return: True if user exists, or False is not or type is not string
+    :return: True if user exists, else False
     """
-    if isinstance(username, str):
-        return User.objects.filter(user_name=username).exists()
-    else:
-        return False
+    return User.objects.filter(user_name=username).exists()
 
 
 def is_email_exists(email):
@@ -112,12 +100,9 @@ def is_email_exists(email):
     Check if email exist in 'User' model
 
     :param email: string
-    :return: True if email exists, or False is not or type is not string
+    :return: True if email exists, else False
     """
-    if isinstance(email, str):
-        return User.objects.filter(email=email).exists()
-    else:
-        return False
+    return User.objects.filter(email=email).exists()
 
 
 def is_client_secret_exists(client_secret):
@@ -125,9 +110,6 @@ def is_client_secret_exists(client_secret):
     Check if client_secret exist in 'Application' model (oauth2_provider)
 
     :param client_secret:
-    :return: True if client_secret exists, or False is not or type is not string
+    :return: True if client_secret exists
     """
-    if isinstance(client_secret, str):
-        return Application.objects.filter(client_secret=client_secret).exists()
-    else:
-        return False
+    return Application.objects.filter(client_secret=client_secret).exists()

@@ -1,11 +1,14 @@
 import logging
+from ipware.ip import get_real_ip
 
-from nalkinscloud_django.settings import PROJECT_NAME
+from nalkinscloud_django.settings import PROJECT_NAME, FRONTEND_DOMAIN, EMAIL_HOST_USER
 from nalkinscloud_api.scheduler import schedule_new_job, remove_job_by_id
 from nalkinscloud_mosquitto.functions import *
 from nalkinscloud_api.functions import *
+from django_user_email_extension.models import *
 
-from ipware.ip import get_real_ip
+# Import serializers
+from nalkinscloud_api.serializers import *
 
 # REST Framework
 from rest_framework.response import Response
@@ -15,14 +18,6 @@ from rest_framework.views import APIView
 
 from django.contrib.auth.forms import PasswordResetForm
 from django.urls import reverse
-
-from nalkinscloud_django.settings import FRONTEND_DOMAIN, EMAIL_HOST_USER
-
-# Import serializers
-from nalkinscloud_api.serializers import *
-
-# django_email_verifier
-from django_user_email_extension.models import *
 
 # Define logger
 logger = logging.getLogger(PROJECT_NAME)
@@ -192,7 +187,6 @@ class DeviceListView(APIView):
             value = 'no devices found'
             logger.info('No devices found')
         else:
-            message = 'success'
             logger.info("User: " + str(email) + " Devices found: " + str(device_list))
 
             json_array = []
@@ -201,10 +195,12 @@ class DeviceListView(APIView):
                 device_id = str(device.device_id)
                 device_name = str(device.device_name)
                 device_type = str(device.device_id.type)
-                logger.info("device_id - " + str(device_id) + "device_name - " + str(device_name) + "device_type - " + str(device_type))
+
                 tmp_json = {"device_id": device_id, "device_name": device_name, "device_type": device_type}
 
                 json_array.append(tmp_json)  # Append current details (device) to the array
+                logger.info(json_array)
+            message = 'success'
             value = json_array  # Set the final json array to 'value'
 
         return Response(build_json_response(message, value), status=status.HTTP_200_OK)
@@ -378,11 +374,9 @@ class RemoveDeviceView(APIView):
 
                 # Update device pass with some random pass
                 new_password = generate_random_8_char_string()
-                logger.info("new password generated: " + new_password)
 
                 # Do hash on the new password
                 hashed_pass = hash_pbkdf2_sha256_password(new_password)
-                logger.info("Password has been hashed: " + hashed_pass)
 
                 # update the hashed pass into the DB,
                 # send device ID, hashed pass and the device name that the user choose
@@ -425,13 +419,13 @@ class ResetPasswordView(APIView):
             if not user_object.check_password(current_password):
                 message = 'failed'
                 value = 'Current Password is incorrect'
-                logger.info("Current Password '" + current_password + "' is incorrect")
+                logger.info("Current Password is incorrect")
             else:
                 user_object.set_password(new_password)
                 user_object.save()
                 message = 'success'
                 value = 'Password have been changed'
-                logger.info("New password '" + new_password + "', Have been set successfully")
+                logger.info("New password successfully set")
 
             return Response(build_json_response(message, value), status=status.HTTP_200_OK)
 
@@ -463,7 +457,7 @@ class SetScheduledJobView(APIView):
             if not get_device_owner(device_id, user_id):
                 message = 'failed'
                 value = 'You cannot set new job for this device'
-                logger.error("User is not the device owner")
+                logger.error("User %s is not owner of device %s" % (user_id, device_id))
             else:
                 # This 'local_start_date' time, in this format:
                 # datetime.datetime(2017, 5, 24, 11, 45, tzinfo=datetime.timezone(datetime.timedelta(0, 10800)))
@@ -561,7 +555,6 @@ class UpdateMQTTUserPassView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-
         logger.info("New UpdateMQTTUserPass request at: " + str(datetime.datetime.now()))
 
         # Get token from request
@@ -574,11 +567,13 @@ class UpdateMQTTUserPassView(APIView):
         # If all passed OK, hash the token, and update customer "device" pass
         hashed_pass = hash_pbkdf2_sha256_password(str(token))
         logger.info("Password has been hashed: " + hashed_pass)
-        update_device_pass_mosquitto_db(email, token)
-
-        # Return user name
-        message = 'success'
-        value = str(email)
+        if update_device_pass_mosquitto_db(email, token):
+            # Return user name
+            message = 'success'
+            value = str(email)
+        else:
+            message = 'failed'
+            value = 'update device pass failed'
 
         return Response(build_json_response(message, value), status=status.HTTP_200_OK)
 

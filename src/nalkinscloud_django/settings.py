@@ -191,10 +191,10 @@ CELERY_BEAT_SCHEDULE = {}
 ######################
 # LOGGING SETTINGS
 ######################
-GRAYLOG_HOST = os.environ.get('graylog_host')
+GRAYLOG_HOST = os.environ.get('graylog_host', None)
 GRAYLOG_PORT = os.environ.get('graylog_port', 12201)
 
-if ENVIRONMENT != 'dev':
+if ENVIRONMENT != 'dev' and GRAYLOG_HOST is not None:
     LOGGING = {
         'version': 1,
         'filters': {
