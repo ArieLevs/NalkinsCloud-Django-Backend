@@ -48,7 +48,7 @@ EOF
 docker run -itd \
     --env-file .env \
     -p 8000:8000 \
-    nalkinscloud-django-backend:latest \
+    docker.nalkins.cloud/nalkinscloud/nalkinscloud-django-backend:latest \
     --name nalkinscloud-django-backend
 ```
 - Once deployed, make sure to serve port 8000 using nginx / apache  

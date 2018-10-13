@@ -27,7 +27,7 @@ ALLOWED_HOSTS = ['api.nalkinscloud.localhost',
                  '127.0.0.1',
                  '10.0.2.2']  # Android AVD IP for localhost
 
-# Application definition
+# Application definition/etc/rc.d/
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -84,7 +84,7 @@ if ENVIRONMENT == 'dev':
             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         }
     }
-elif ENVIRONMENT == 'alpha':
+else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
