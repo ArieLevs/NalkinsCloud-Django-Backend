@@ -1,5 +1,7 @@
 NalkinsCloud-Django-Backend
 ===========================
+[![](https://img.shields.io/github/license/ArieLevs/NalkinsCloud-Django-Backend.svg)](https://github.com/ArieLevs/NalkinsCloud-Django-Backend)
+
 
 This is Django server code, implementing REST API to support [NalkinsCloud](https://github.com/ArieLevs/NalkinsCloud),
 The server will connect Android application to MQTT server and database.
