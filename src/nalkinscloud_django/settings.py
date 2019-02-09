@@ -148,9 +148,7 @@ OAUTH2_PROVIDER = {
 STATIC_URL = os.environ.get('static_url', "/static/")
 
 # This setting defines the additional locations the staticfiles
-STATICFILES_DIRS = [
-    'static/',
-]
+STATICFILES_DIRS = []
 
 # The absolute path to the directory where collectstatic will collect static files for deployment
 if ENVIRONMENT == 'ci':
