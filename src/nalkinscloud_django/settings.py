@@ -144,12 +144,15 @@ OAUTH2_PROVIDER = {
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
-STATIC_URL = '/static/'
+# URL to use when referring to static files
+STATIC_URL = os.environ.get('static_url', "/static/")
 
+# This setting defines the additional locations the staticfiles
 STATICFILES_DIRS = [
     'static/',
 ]
 
+# The absolute path to the directory where collectstatic will collect static files for deployment
 if ENVIRONMENT == 'ci':
     STATIC_ROOT = os.environ.get('static_root', os.path.join(BASE_DIR, "static"))
 
