@@ -8,6 +8,7 @@ FRONTEND_DOMAIN = os.environ.get('frontend_domain', 'http://127.0.0.1:8000')
 
 PROJECT_NAME = 'nalkinscloud-api'
 VERSION = os.environ.get('version', 'null')
+EXTRA_ALLOWED_HOSTS = os.environ.get('allowed_hosts', '').split(',')
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,7 +26,8 @@ ALLOWED_HOSTS = ['api.nalkinscloud.localhost',
                  'alpha.api.nalkins.cloud',
                  'api.nalkins.cloud',
                  '127.0.0.1',
-                 '10.0.2.2']  # Android AVD IP for localhost
+                 '10.0.2.2' # Android AVD IP for localhost
+                 ] + EXTRA_ALLOWED_HOSTS
 
 # Application definition/etc/rc.d/
 INSTALLED_APPS = [
