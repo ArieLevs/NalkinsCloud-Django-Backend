@@ -19,6 +19,7 @@ SECRET_KEY = os.environ.get('django_secret_key', 'djangoSecretKey')
 # SECURITY WARNING: don't run with debug turned on in production!
 if ENVIRONMENT == 'dev':
     DEBUG = True
+    EXTRA_ALLOWED_HOSTS.append('*')
 else:
     DEBUG = False
 
@@ -26,7 +27,7 @@ ALLOWED_HOSTS = ['api.nalkinscloud.localhost',
                  'alpha.api.nalkins.cloud',
                  'api.nalkins.cloud',
                  '127.0.0.1',
-                 '10.0.2.2' # Android AVD IP for localhost
+                 '10.0.2.2'  # Android AVD IP for localhost
                  ] + EXTRA_ALLOWED_HOSTS
 
 # Application definition/etc/rc.d/
