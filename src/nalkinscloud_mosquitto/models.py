@@ -92,7 +92,7 @@ class CustomerDevice(models.Model):
     date_created = models.DateTimeField(_('Date Created'),  auto_now_add=True, blank=True)
 
     def __str__(self):
-        return 'Device of customer: ' + self.user_id.email
+        return self.user_id.email + ' has device' + self.device_id.device_id
 
     class Meta:
         # unique_together = ('user_id', 'device_id',)  # Set primary combined key
@@ -105,7 +105,7 @@ class CustomerDevice(models.Model):
 
 
 class AccessList(models.Model):
-    device = models.OneToOneField(Devices, on_delete=models.CASCADE)
+    device = models.ForeignKey(Devices, on_delete=models.CASCADE)
     topic = models.CharField(_('Message Topic'), max_length=256, null=False)
     rw = models.IntegerField(_('Read Write Mode'),
                              validators=[MaxValueValidator(2), MinValueValidator(0)],
@@ -119,10 +119,10 @@ class AccessList(models.Model):
     last_update_date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return 'ACL of device: ' + self.device.device_id
+        return 'device: ' + self.device.device_id + ' can access ' + self.topic
 
     class Meta:
-        unique_together = ('device', 'topic')
+        unique_together = (('device', 'topic'),)
         verbose_name = _('access_list')
         verbose_name_plural = _('access_list')
         db_table = 'access_list'
