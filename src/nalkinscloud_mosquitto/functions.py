@@ -5,11 +5,11 @@ from nalkinscloud_mosquitto.models import *
 # Update device password on mosquitto DB
 def update_device_pass_mosquitto_db(device_id, password):
     try:
-        device = Devices.objects.get(device_id=device_id)
+        device = Device.objects.get(device_id=device_id)
         device.password = password
         device.save()
         return True
-    except Devices.DoesNotExist:
+    except Device.DoesNotExist:
         return False
 
 
@@ -24,7 +24,7 @@ def insert_into_acls_mosquitto_db(device_id, topic):
 
 # Get client ID from mosquitto if exists
 def is_device_id_exists(device_id):
-    return Devices.objects.filter(device_id=device_id).exists()
+    return Device.objects.filter(device_id=device_id).exists()
 
 
 # Get current owner id of the device
@@ -51,7 +51,7 @@ def remove_from_customer_devices(user_id, device_id):
 
 
 def remove_from_acls(device_id, topic):
-    device_obj = Devices.objects.get(device_id=device_id)
+    device_obj = Device.objects.get(device_id=device_id)
     AccessList.objects.filter(device=device_obj, topic=topic).delete()
 
 
@@ -62,9 +62,9 @@ def get_customers_devices(user_id):
 
 # Add new device to the devices table
 def insert_new_client_to_devices(email, password, ip):
-    new_device, created = Devices.objects.get_or_create(device_id=email,
-                                                        model=DeviceModel.objects.get(model='application'),
-                                                        type=DeviceType.objects.get(type='user'))
+    new_device, created = Device.objects.get_or_create(device_id=email,
+                                                       model=DeviceModel.objects.get(model='application'),
+                                                       type=DeviceType.objects.get(type='user'))
     if created:  # We are adding a new device
         new_device.password = password
         new_device.is_enabled = 1

@@ -1,5 +1,5 @@
 from django.db import migrations
-from nalkinscloud_mosquitto.models import DeviceType, DeviceModel, Devices, AccessList
+from nalkinscloud_mosquitto.models import DeviceType, DeviceModel, Device, AccessList
 from nalkinscloud_django.settings import ENVIRONMENT
 
 
@@ -28,11 +28,11 @@ def create_devices(apps, schema_editor):
                          'model': 'esp8266',
                          'type': 'dht'}]
         for device in devices_list:
-            Devices.objects.create(device_id=device['device_id'],
-                                   password=device['password'],
-                                   model=DeviceModel.objects.get(model=device['model']),
-                                   type=DeviceType.objects.get(type=device['type']),
-                                   is_enabled=1)
+            Device.objects.create_device(device_id=device['device_id'],
+                                         password=device['password'],
+                                         model=DeviceModel.objects.get(model=device['model']),
+                                         type=DeviceType.objects.get(type=device['type']),
+                                         is_enabled=True,)
 
 
 def create_acls(apps, schema_editor):
@@ -42,10 +42,10 @@ def create_acls(apps, schema_editor):
                     {'device': 'test_dht_simulator',
                      'topic': 'test_dht_simulator/#'}]
         for acl in acl_list:
-            AccessList.objects.create(device=Devices.objects.get(device_id=acl['device']),
+            AccessList.objects.create(device=Device.objects.get(device_id=acl['device']),
                                       topic=acl['topic'],
                                       rw=2,
-                                      is_enabled=1)
+                                      is_enabled=True)
 
 
 class Migration(migrations.Migration):
