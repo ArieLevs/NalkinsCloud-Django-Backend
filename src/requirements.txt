@@ -10,5 +10,5 @@ mysqlclient
 django-ipware
 pytz
 PyYAML
-graypy # Graylog logger
+graypy==1.1.1 # Graylog logger
 gunicorn

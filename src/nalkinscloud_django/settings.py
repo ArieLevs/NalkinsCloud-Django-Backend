@@ -212,7 +212,7 @@ if ENVIRONMENT != 'dev' and GRAYLOG_HOST is not None:
         },
         'handlers': {
             'gelf': {
-                'class': 'graypy.GELFHandler',
+                'class': 'graypy.GELFUDPHandler',
                 'host': GRAYLOG_HOST,
                 'port': GRAYLOG_PORT,
                 'filters': ['fields']
