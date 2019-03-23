@@ -1,3 +1,4 @@
+{% load static %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -6,6 +7,10 @@
     <title>Nalkins Cloud</title>
 
     {% block title %}<title>Nalkins Cloud</title>{% endblock %}
+
+    <!-- GitHub Bootstrap Social Buttons -->
+    <link href="{% static 'bootstrap-social-gh-pages/bootstrap-social.css' %}" rel="stylesheet">
+    <link href="{% static 'bootstrap-social-gh-pages/assets/css/font-awesome.css' %}" rel="stylesheet">
 </head>
 <body>
     <div align="center">
@@ -15,7 +20,21 @@
     </div>
 
 </body>
+    <br>
     <footer>
+    {% if user.is_authenticated %}
+        <p>logged in user: {{ user.email }}</p>
+        <a href="{% url 'logout_process' %}">Logout</a>
+    {% else %}
+        <div class="container">
+            <a class="btn btn-block btn-social btn-google" href="{% url 'social:begin' 'google-oauth2' %}">
+                <span class="fa fa-google"></span>
+            </a>
+            <a class="btn btn-block btn-social btn-github" href="{% url 'social:begin' 'github' %}">
+                <span class="fa fa-github"></span>
+            </a>
+        </div>
+    {% endif %}
         <p>version: {{ version }}</p>
     </footer>
 </html>

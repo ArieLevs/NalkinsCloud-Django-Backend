@@ -6,6 +6,9 @@ from . import views
 urlpatterns = [
     url(r'^$', views.index, name='index'),
 
+    # General
+    url(r'^logout_process/', views.logout_process, name='logout_process'),
+
     # Email verifications urls
     url(r'^verify_account/(?P<uuid>[a-z0-9\-]+)/', views.verify_account, name='verify_account'),
     url(r'^verify_account_successful/', views.verify_account_successful, name='verify_account_successful'),

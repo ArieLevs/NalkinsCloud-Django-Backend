@@ -3,7 +3,8 @@ import datetime
 
 from nalkinscloud_django.settings import BASE_DIR, PROJECT_NAME, VERSION
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth import logout
 
 from django_user_email_extension.models import verify_record
 
@@ -68,3 +69,10 @@ def verify_account_failed(request):
         context,
         status=HttpResponse.status_code,
     )
+
+
+def logout_process(request):
+    default_logger.info("logout_process request at: " + str(datetime.datetime.now()) + " by user: " + str(request.user))
+
+    logout(request)
+    return HttpResponseRedirect('/')

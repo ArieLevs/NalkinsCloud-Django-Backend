@@ -7,10 +7,10 @@ urlpatterns = [
 
     # OAUTH URLS
     url(r'^', include('oauth2_provider.urls', namespace='oauth2_provider')),
-
     # Django auth urls
     url('^', include('django.contrib.auth.urls')),
+    # Social auth urls
+    url('', include('social_django.urls', namespace='social')),
 
     path('nalkinsadmin/', admin.site.urls),
-
 ]
