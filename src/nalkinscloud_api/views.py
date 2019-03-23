@@ -1,7 +1,7 @@
 import logging
 import datetime
 
-from nalkinscloud_django.settings import BASE_DIR, PROJECT_NAME, VERSION
+from nalkinscloud_django.settings import BASE_DIR, PROJECT_NAME, VERSION, ENVIRONMENT
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import logout
@@ -12,9 +12,11 @@ from django_user_email_extension.models import verify_record
 default_logger = logging.getLogger(PROJECT_NAME)
 
 # Define global context values
-context = {'project_name': 'NalkinsCloud',
+context = {'project_name': PROJECT_NAME,
            'developer': 'Arie Lev',
-           'current_year': datetime.datetime.now().year}  # Pass year to template
+           'current_year': datetime.datetime.now().year,
+           'version': VERSION,
+           'environment': ENVIRONMENT}  # Pass year to template
 
 
 # Render main index page
@@ -76,3 +78,18 @@ def logout_process(request):
 
     logout(request)
     return HttpResponseRedirect('/')
+
+
+def login_page(request):
+    default_logger.info("login_page request at: " + str(datetime.datetime.now()))
+    default_logger.info(request)
+
+    if request.user.is_authenticated:
+        return HttpResponseRedirect('/')
+    else:
+        return render(
+            request,
+            BASE_DIR + '/templates/login.html',
+            context,
+            status=HttpResponse.status_code,
+        )
