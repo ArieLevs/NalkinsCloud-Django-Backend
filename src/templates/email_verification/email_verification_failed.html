@@ -1,17 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Nalkins Cloud</title>
+{% extends 'base.html' %}
+{% load static %}
 
-    {% block title %}<title>Nalkins Cloud</title>{% endblock %}
-</head>
-<body>
-    <div align="center">
-        <h1>Somethings wrong - Nalkins Cloud Account Verification Failed</h1>
-        <h4>Project By Arie Lev</h4>
-        <p><a href="https://github.com/ArieLevs/NalkinsCloud">Nalkins Cloud on GitHub</a></p>
-    </div>
-
-</body>
-</html>
+{% block body_block %}
+    <header class="masthead text-center text-white d-flex" style="background:#cccccc !important;">
+        <div class="container my-auto">
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <h1 class="text-uppercase">
+                        <h1>Somethings wrong - Nalkins Cloud Account Verification Failed</h1>
+                    </h1>
+                    <hr>
+                </div>
+                <div class="col-lg-8 mx-auto">
+                    <p class="text-faded mb-5">Project By {{ developer }}</p>
+                    <a class="btn btn-primary btn-xl js-scroll-trigger" href="https://github.com/ArieLevs/NalkinsCloud">Nalkins Cloud on GitHub</a>
+                </div>
+            </div>
+        </div>
+    </header>
+{% endblock %}

@@ -12,19 +12,19 @@ from django_user_email_extension.models import verify_record
 default_logger = logging.getLogger(PROJECT_NAME)
 
 # Define global context values
-context = {'project_name': PROJECT_NAME,
-           'developer': 'Arie Lev',
-           'current_year': datetime.datetime.now().year,
-           'version': VERSION,
-           'environment': ENVIRONMENT}  # Pass year to template
+context = {
+    'project_name': PROJECT_NAME,
+    'developer': 'Arie Lev',
+    'current_year': datetime.datetime.now().year,
+    'version': VERSION,
+    'environment': ENVIRONMENT,
+}
 
 
 # Render main index page
 def index(request):
     default_logger.info("index request at: " + str(datetime.datetime.now()))
     default_logger.info(request)
-
-    context.update({'version': VERSION})
 
     return render(
         request,

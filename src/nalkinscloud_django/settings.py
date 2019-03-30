@@ -204,7 +204,11 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('google_oauth_client_id', 'None')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('google_oauth_client_secret', 'None')
 SOCIAL_AUTH_GITHUB_KEY = os.environ.get('github_oauth_client_id', 'None')
 SOCIAL_AUTH_GITHUB_SECRET = os.environ.get('github_oauth_client_secret', 'None')
-SOCIAL_AUTH_GITHUB_SCOPE = ['user:email']
+SOCIAL_AUTH_GITHUB_SCOPE = [
+    'read:user',
+    'user:email',
+    'read:org',
+]
 
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.github.GithubOAuth2',

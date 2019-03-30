@@ -75,11 +75,31 @@
                 </div>
                 {% if user.is_authenticated %}
                 <div class="col-lg-6 h-100 text-center text-lg-right my-auto">
+
+                    <!-- Print current users email -->
                     <ul class="list-inline mb-0">
                         <li class="list-inline-item">
                             <p class="text-muted small mb-4 mb-lg-0">Logged in user: {{ user.email }}</p>
                         </li>
                     </ul>
+
+                    <!-- Print current users providers -->
+                    <ul class="list-inline mb-0">
+                        <li class="list-inline-item">
+                        <p class="text-muted small mb-4 mb-lg-0">Signed in via:</p>
+                        </li>
+                    {% for ass in backends.associated %}
+                        <li class="list-inline-item">
+                              {% if ass.provider == 'google-oauth2' %}
+                                  <p class="text-muted small mb-4 mb-lg-0">{{ ass.provider }}</p>
+                              {% endif %}
+                              {% if ass.provider == 'github' %}
+                                  <p class="text-muted small mb-4 mb-lg-0">{{ ass.provider }}</p>
+                              {% endif %}
+                        </li>
+                    {% endfor %}
+                    </ul>
+
                 </div>
                 {% endif %}
             </div>
