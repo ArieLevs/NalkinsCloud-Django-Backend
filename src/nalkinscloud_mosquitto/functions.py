@@ -6,7 +6,7 @@ from nalkinscloud_mosquitto.models import *
 def update_device_pass_mosquitto_db(device_id, password):
     try:
         device = Device.objects.get(device_id=device_id)
-        device.password = password
+        device.set_password(password)
         device.save()
         return True
     except Device.DoesNotExist:
