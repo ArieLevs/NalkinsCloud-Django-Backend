@@ -28,11 +28,11 @@ class HealthCheckView(APIView):
 
     def post(self, request):
         logger.info("HealthCheckView request at: " + str(datetime.datetime.now()))
-        logger.info(request)
 
         # Get token from request
         token = request.auth
         email = str(token.user)
+        logger.info("request from user: " + email)
 
         message = 'success'
 
@@ -42,7 +42,6 @@ class HealthCheckView(APIView):
 
 
 class RegistrationView(APIView):
-    """ Allow registration of new users. """
     permission_classes = ()  # No Authentication needed here
 
     def post(self, request):
@@ -66,10 +65,12 @@ class RegistrationView(APIView):
         if not is_client_secret_exists(data['client_secret']):
             message = 'failed'
             value = 'Application could not be verified'
+            response_code = status.HTTP_401_UNAUTHORIZED
         else:
             if is_email_exists(data['email']):  # Check if email already exists
                 message = 'failed'
                 value = 'Email already exists'
+                response_code = status.HTTP_409_CONFLICT
                 logger.error('%s - Email already exists', data['email'])
             else:
 
@@ -86,6 +87,7 @@ class RegistrationView(APIView):
                 if not insert_new_client_to_devices(data['email'], data['password'], ip):
                     message = 'failed'
                     value = 'Registration Error occur'
+                    response_code = status.HTTP_500_INTERNAL_SERVER_ERROR
                     logger.error('Failed to add %s record to devices table', data['email'])
                 else:
                     # Insert the customer into 'acls' table, with topic of: email/#
@@ -108,8 +110,9 @@ class RegistrationView(APIView):
                                                      from_mail=EMAIL_HOST_USER)
                     message = 'success'
                     value = 'Registered!'
+                    response_code = status.HTTP_201_CREATED
                     logger.info("success Registered!")
-        return Response(build_json_response(message, value), status=status.HTTP_201_CREATED)
+        return Response(build_json_response(message, value), status=response_code)
 
 
 class DeviceActivationView(APIView):
