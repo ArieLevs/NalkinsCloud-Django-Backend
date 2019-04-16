@@ -245,40 +245,50 @@ CELERY_BEAT_SCHEDULE = {}
 ######################
 # LOGGING SETTINGS
 ######################
+LOG_LEVEL = os.environ.get('log_level', 'INFO')
+
 GRAYLOG_ENABLED = os.environ.get('graylog_enabled', False) == 'True'
 GRAYLOG_HOST = os.environ.get('graylog_host', 'localhost')
 GRAYLOG_PORT = os.environ.get('graylog_port', 12201)
 
 if GRAYLOG_ENABLED:
-    LOGGING = {
-        'version': 1,
-        'filters': {
-            'fields': {
-                '()': 'nalkinscloud_api.logging_filter.FieldFilter',
-                'fields': {
-                    'application': PROJECT_NAME,
-                    'environment': ENVIRONMENT,
-                },
-            },
-        },
-        'handlers': {
-            'gelf': {
-                'class': 'graypy.GELFUDPHandler',
-                'host': GRAYLOG_HOST,
-                'port': GRAYLOG_PORT,
-                'filters': ['fields']
-            },
-        },
+    HANDLERS = ['gelf']
+else:
+    HANDLERS = ['console']
 
-        'loggers': {
-            PROJECT_NAME: {
-                'handlers': ['gelf'],
-                'level': 'DEBUG',
-            },
-            'django.request': {
-                'handlers': ['gelf'],
-                'level': 'WARNING',
-                'propagate': False,
+LOGGING = {
+    'version': 1,
+    'filters': {
+        'fields': {
+            '()': 'nalkinscloud_api.logging_filter.FieldFilter',
+            'fields': {
+                'application': PROJECT_NAME,
+                'environment': ENVIRONMENT,
             },
         },
-    }
+    },
+    'handlers': {
+        'gelf': {
+            'class': 'graypy.GELFUDPHandler',
+            'host': GRAYLOG_HOST,
+            'port': GRAYLOG_PORT,
+            'filters': ['fields']
+        },
+        'console': {
+            'level': LOG_LEVEL,
+            'class': 'logging.StreamHandler',
+        },
+    },
+
+    'loggers': {
+        PROJECT_NAME: {
+            'handlers': HANDLERS,
+            'level': LOG_LEVEL,
+        },
+        'django.request': {
+            'handlers': HANDLERS,
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}
