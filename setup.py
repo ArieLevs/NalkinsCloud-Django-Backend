@@ -9,7 +9,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-nalkinscloud-api',
-    version='0.0.34',
+    version='0.0.36',
     packages=find_packages(),
     include_package_data=True,
     license='Apache License 2.0',
