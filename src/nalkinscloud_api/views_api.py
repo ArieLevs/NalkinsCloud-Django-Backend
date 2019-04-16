@@ -135,6 +135,7 @@ class DeviceActivationView(APIView):
             if not is_device_id_exists(device_id):
                 message = 'failed'
                 value = 'Device does not exists'
+                response_code = status.HTTP_204_NO_CONTENT
                 logger.error("Device does not exists")
             else:
                 # Get token from request
@@ -149,6 +150,7 @@ class DeviceActivationView(APIView):
                 if not get_device_owner(device_id, user_id):
                     message = 'failed'
                     value = 'Device already associated'
+                    response_code = status.HTTP_409_CONFLICT
                     logger.error("Device already associated")
                 else:
                     logger.info("All checks passed, activating device")
@@ -157,6 +159,7 @@ class DeviceActivationView(APIView):
                     if not insert_into_customer_devices(user_id, device_id, device_name):
                         message = 'failed'
                         value = 'Device Activation Failed'
+                        response_code = status.HTTP_500_INTERNAL_SERVER_ERROR
                         logger.error('Failed to add new device to customers_devices table')
                     else:
                         logger.info("insert_into_customer_devices completed")
@@ -170,7 +173,8 @@ class DeviceActivationView(APIView):
 
                         message = 'success'
                         value = 'Activation successfully completed'
-            return Response(build_json_response(message, value), status=status.HTTP_200_OK)
+                        response_code = status.HTTP_200_OK
+            return Response(build_json_response(message, value), status=response_code)
 
 
 class DeviceListView(APIView):
@@ -183,11 +187,13 @@ class DeviceListView(APIView):
         token = request.auth
         email = token.user
         user_id = token.user_id
+        logger.info("request from user: " + str(email))
 
         device_list = get_customers_devices(user_id)  # Get list of devices from the DB
         if not device_list:
             message = 'failed'
             value = 'no devices found'
+            response_code = status.HTTP_204_NO_CONTENT
             logger.info('No devices found')
         else:
             logger.info("User: " + str(email) + " Devices found: " + str(device_list))
@@ -203,10 +209,11 @@ class DeviceListView(APIView):
 
                 json_array.append(tmp_json)  # Append current details (device) to the array
                 logger.info(json_array)
+            response_code = status.HTTP_200_OK
             message = 'success'
             value = json_array  # Set the final json array to 'value'
 
-        return Response(build_json_response(message, value), status=status.HTTP_200_OK)
+        return Response(build_json_response(message, value), status=response_code)
 
 
 class ForgotPasswordView(APIView):
