@@ -19,14 +19,16 @@ def create_device_models(apps, schema_editor):
 
 def create_devices(apps, schema_editor):
     if ENVIRONMENT != 'production':
-        devices_list = [{'device_id': 'test_switch_simulator',
-                         'password': 'nalkinscloud',
-                         'model': 'esp8266',
-                         'type': 'switch'},
-                        {'device_id': 'test_dht_simulator',
-                         'password': 'nalkinscloud',
-                         'model': 'esp8266',
-                         'type': 'dht'}]
+        devices_list = [
+            {'device_id': 'test_switch_simulator',
+             'password': 'nalkinscloud',
+             'model': 'esp8266',
+             'type': 'switch'},
+            {'device_id': 'test_dht_simulator',
+             'password': 'nalkinscloud',
+             'model': 'esp8266',
+             'type': 'dht'}
+        ]
         for device in devices_list:
             Device.objects.create_device(device_id=device['device_id'],
                                          password=device['password'],
@@ -37,10 +39,10 @@ def create_devices(apps, schema_editor):
 
 def create_acls(apps, schema_editor):
     if ENVIRONMENT != 'production':
-        acl_list = [{'device': 'test_switch_simulator',
-                     'topic': 'test_switch_simulator/#'},
-                    {'device': 'test_dht_simulator',
-                     'topic': 'test_dht_simulator/#'}]
+        acl_list = [
+            {'device': 'test_switch_simulator', 'topic': 'test_switch_simulator/#'},
+            {'device': 'test_dht_simulator', 'topic': 'test_dht_simulator/#'}
+        ]
         for acl in acl_list:
             AccessList.objects.create(device=Device.objects.get(device_id=acl['device']),
                                       topic=acl['topic'],
