@@ -90,8 +90,9 @@ class RegistrationView(APIView):
                     response_code = status.HTTP_500_INTERNAL_SERVER_ERROR
                     logger.error('Failed to add %s record to devices table', data['email'])
                 else:
-                    # Insert the customer into 'acls' table, with topic of: email/#
-                    insert_into_acls_mosquitto_db(data['email'], data['email'] + "/#")
+                    # Insert the customer into 'access_list' table, with topic of: email/#
+                    device = Device.objects.get(device_id=data['email'])
+                    insert_into_access_list(device, data['email'] + "/#")
 
                     new_user.registration_ip = ip
                     new_user.is_active = False
@@ -129,10 +130,10 @@ class DeviceActivationView(APIView):
             data = serializer.data
             logger.info("Request Parameters: " + str(data))
 
-            device_id = data['device_id']
+            device_id_string = data['device_id']
             device_name = data['device_name']
 
-            if not is_device_id_exists(device_id):
+            if not is_device_id_exists(device_id_string):
                 message = 'failed'
                 value = 'Device does not exists'
                 response_code = status.HTTP_204_NO_CONTENT
@@ -141,39 +142,47 @@ class DeviceActivationView(APIView):
                 # Get token from request
                 token = request.auth
                 email = token.user
-                user_id = token.user_id
+                user = User.objects.get(email=email)
+                user_device = Device.objects.get(device_id=email)
+                device = Device.objects.get(device_id=device_id_string)
 
-                logger.info("Current logged in user: " + str(email) + " ID is: " + str(user_id))
+                logger.info("Current logged in user: " + str(email) + " ID is: " + str(user))
 
                 # Check if the activated device is new (never got activated)
                 # or the original username is activating his device again
-                if not get_device_owner(device_id, user_id):
-                    message = 'failed'
-                    value = 'Device already associated'
-                    response_code = status.HTTP_409_CONFLICT
-                    logger.error("Device already associated")
+                if is_device_owned_by_user(device, user):
+                    message = 'success'
+                    value = 'device already activated'
+                    response_code = status.HTTP_200_OK
+                    logger.error("Device already activated")
                 else:
-                    logger.info("All checks passed, activating device")
-
-                    # Insert the device into 'customer_devices' table
-                    if not insert_into_customer_devices(user_id, device_id, device_name):
+                    if device_has_any_owner(device):
                         message = 'failed'
-                        value = 'Device Activation Failed'
-                        response_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-                        logger.error('Failed to add new device to customers_devices table')
+                        value = 'Device already associated'
+                        response_code = status.HTTP_409_CONFLICT
+                        logger.error("Device already associated")
                     else:
-                        logger.info("insert_into_customer_devices completed")
+                        logger.info("All checks passed, activating device")
 
-                        # Build the topic, combined with userId + deviceId
-                        topic = device_id + "/#"
-                        # Insert the device into 'acls' table
-                        insert_into_acls_mosquitto_db(device_id, topic)
-                        insert_into_acls_mosquitto_db(email, topic)
-                        logger.info("insert_into_acls_mosquitto_db completed")
+                        # Insert the device into 'customer_devices' table
+                        if not insert_into_customer_devices(user, device, device_name):
+                            message = 'failed'
+                            value = 'Device Activation Failed'
+                            response_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+                            logger.error('Failed to add new device to customers_devices table')
+                        else:
+                            logger.info("insert_into_customer_devices completed")
 
-                        message = 'success'
-                        value = 'Activation successfully completed'
-                        response_code = status.HTTP_200_OK
+                            # Build the topic, combined with userId + deviceId
+                            topic = data['device_id'] + "/#"
+                            # Insert the device into 'access_list' table
+                            insert_into_access_list(device, topic)
+                            insert_into_access_list(user_device, topic)
+                            logger.info("insert_into_access_list_mosquitto_db completed")
+
+                            message = 'success'
+                            value = 'Activation successfully completed'
+                            response_code = status.HTTP_200_OK
             return Response(build_json_response(message, value), status=response_code)
 
 
@@ -233,7 +242,7 @@ class ForgotPasswordView(APIView):
             client_secret = data['client_secret']
 
             ip = get_real_ip(request)
-            if ip is not None:
+            if ip is None:
                 logger.error('Could not detect IP of request')
                 ip = 'none'
 
@@ -241,12 +250,15 @@ class ForgotPasswordView(APIView):
             if not is_client_secret_exists(client_secret):
                 message = 'failed'
                 value = 'Application could not be verified'
+                response_code = status.HTTP_401_UNAUTHORIZED
             else:
                 if not is_email_exists(data['email']):  # Check if email exists
-                    logger.error("Error, email does not exist")
-                    # Notify user all went OK
+                    # Notify user all went OK, even if email does not exists
+                    # this is done to prevent email exposes
                     message = 'success'
                     value = 'Forgot Password Process completed'
+                    response_code = status.HTTP_200_OK
+                    logger.error("Error, email does not exist")
                 else:
                     # If all passed OK
                     form = PasswordResetForm(data)
@@ -254,14 +266,16 @@ class ForgotPasswordView(APIView):
                         message = 'failed'
                         value = 'Form is not valid'
                         logger.info("Forgot password form is NOT valid")
+                        response_code = status.HTTP_400_BAD_REQUEST
                     else:
                         logger.info("Forgot password form is valid")
                         form.save(request=request)
                         logger.info("Success, Email sent to: " + data['email'])
                         message = 'success'
                         value = 'Forgot Password Process completed'
+                        response_code = status.HTTP_200_OK
 
-            return Response(build_json_response(message, value), status=status.HTTP_200_OK)
+            return Response(build_json_response(message, value), status=response_code)
 
 
 class GetDevicePassView(APIView):
@@ -284,44 +298,43 @@ class GetDevicePassView(APIView):
                 message = 'failed'
                 value = 'Device does not exists'
                 logger.info("Device " + device_id + "does not exists")
+                response_code = status.HTTP_204_NO_CONTENT
             else:
                 # Get token from request
                 token = request.auth
                 email = token.user
-                user_id = token.user_id
+                user = User.objects.get(email=email)
 
-                logger.info("Current logged in user: " + str(email) + " ID is: " + str(user_id))
+                logger.info("Current logged in user: " + str(email) + " ID is: " + str(user))
 
                 # Check if the activated device is new (never got activated)
                 # or the original user is activating his device again
-                if not get_device_owner(device_id, user_id):
+                if not is_device_owned_by_user(device_id, user):
                     message = 'failed'
-                    value = 'Device already associated'
-                    logger.info("Device already associated")
+                    value = 'User is not the owner'
+                    logger.info("User is not the owner")
+                    response_code = status.HTTP_409_CONFLICT
                 else:
                     logger.info("All checks passed, generating hashed pass")
                     # Generate the password (8 characters long mixed digits with letters)
                     # The 'newPassword' should be returned to the app
                     new_password = generate_random_8_char_string()
-                    # logger.info("New password generated: " + new_password)
 
                     # update the pass into the DB,
                     # send device ID, pass and the device name that the user choose
                     # NOTE - password is being hashed on device.save def
-                    if update_device_pass_mosquitto_db(device_id, new_password):
-                        logger.info("Password updated")
-
-                        # Set success values
+                    if update_device_pass(device_id, new_password):
                         message = 'success'
                         value = new_password
+                        logger.info("Password updated")
+                        response_code = status.HTTP_200_OK
                     else:
-                        logger.info("Password Update Failed")
-
-                        # Set success values
                         message = 'failed'
                         value = 'Password Update Failed'
+                        logger.info("Password Update Failed")
+                        response_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
-            return Response(build_json_response(message, value), status=status.HTTP_200_OK)
+            return Response(build_json_response(message, value), status=response_code)
 
 
 class GetScheduledJobView(APIView):
@@ -363,24 +376,26 @@ class RemoveDeviceView(APIView):
             data = serializer.data
             logger.info("Request Parameters: " + str(data))
 
-            device_id = data['device_id']
+            device_id_string = data['device_id']
 
             # Get token from request
             token = request.auth
             email = token.user
-            user_id = token.user_id
+            user = User.objects.get(email=email)
+            device = Device.objects.get(device_id=device_id_string)
 
-            logger.info("Current logged in user: " + str(email) + " ID is: " + str(user_id))
+            logger.info("Current logged in user: " + str(email) + " ID is: " + str(user))
 
-            if not get_device_owner(device_id, user_id):
+            if not is_device_owned_by_user(device, user):
                 message = 'failed'
                 value = 'You cannot remove this device'
                 logger.error("User is not the device owner")
+                response_code = status.HTTP_409_CONFLICT
             else:
-                remove_from_customer_devices(user_id, device_id)
+                remove_from_customer_devices(user, device)
 
-                remove_from_acls(email, device_id + '%')
-                remove_from_acls(device_id, device_id + '%')
+                remove_from_access_list(email, device_id_string + '%')
+                remove_from_access_list(device.device_id, device_id_string + '%')
 
                 # Update device pass with some random pass
                 new_password = generate_random_8_char_string()
@@ -390,14 +405,13 @@ class RemoveDeviceView(APIView):
 
                 # update the hashed pass into the DB,
                 # send device ID, hashed pass and the device name that the user choose
-                update_device_pass_mosquitto_db(device_id, hashed_pass)
-
-                logger.info("Password updated")
+                update_device_pass(device, hashed_pass)
 
                 message = "success"
                 value = "Device Removed from account"
+                response_code = status.HTTP_200_OK
 
-            return Response(build_json_response(message, value), status=status.HTTP_200_OK)
+            return Response(build_json_response(message, value), status=response_code)
 
 
 class ResetPasswordView(APIView):
@@ -420,24 +434,23 @@ class ResetPasswordView(APIView):
             # Get token from request
             token = request.auth
             email = token.user
-            user_id = token.user_id
-
-            logger.info("Current logged in user name: " + str(email) + " ID is: " + str(user_id))
-
-            user_object = User.objects.get(id=user_id)
+            user_object = User.objects.get(email=email)
+            logger.info("Current logged in user name: " + str(email) + " ID is: " + str(user_object))
 
             if not user_object.check_password(current_password):
                 message = 'failed'
                 value = 'Current Password is incorrect'
                 logger.info("Current Password is incorrect")
+                response_code = status.HTTP_422_UNPROCESSABLE_ENTITY
             else:
                 user_object.set_password(new_password)
                 user_object.save()
                 message = 'success'
                 value = 'Password have been changed'
                 logger.info("New password successfully set")
+                response_code = status.HTTP_200_OK
 
-            return Response(build_json_response(message, value), status=status.HTTP_200_OK)
+            return Response(build_json_response(message, value), status=response_code)
 
 
 class SetScheduledJobView(APIView):
@@ -464,7 +477,7 @@ class SetScheduledJobView(APIView):
 
             logger.info("Current logged in user name: " + str(email) + " ID is: " + str(user_id))
 
-            if not get_device_owner(device_id, user_id):
+            if not is_device_owned_by_user(device_id, user_id):
                 message = 'failed'
                 value = 'You cannot set new job for this device'
                 logger.error("User %s is not owner of device %s" % (user_id, device_id))
@@ -575,15 +588,17 @@ class UpdateMQTTUserPassView(APIView):
         logger.info("Current logged in user: " + str(email) + " ID is: " + str(user_id))
 
         # If all passed OK, update customer "device" pass
-        if update_device_pass_mosquitto_db(email, token):
+        if update_device_pass(email, token):
             # Return user name
             message = 'success'
             value = str(email)
+            response_code = status.HTTP_200_OK
         else:
             message = 'failed'
             value = 'update device pass failed'
+            response_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
-        return Response(build_json_response(message, value), status=status.HTTP_200_OK)
+        return Response(build_json_response(message, value), status=response_code)
 
 
 class SetScheduledJobView2(APIView):
