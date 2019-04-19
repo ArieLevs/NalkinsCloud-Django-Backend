@@ -1,5 +1,6 @@
 
-'''# Insert new customer into customers table in mosquitto
+"""
+# Insert new customer into customers table in mosquitto
 def insert_new_customer_to_mosquitto(user_id, email):
     db = MosquittoDB()
     sql = 'INSERT INTO customers ' \
@@ -140,4 +141,5 @@ def get_device_name_by_id(device_id):
           'FROM customer_devices ' \
           'WHERE device_id=%s'
     params = [device_id]
-    return db.query(sql, params)'''
+    return db.query(sql, params)
+"""

@@ -12,6 +12,6 @@ class NalkinsCloudAPIConfig(AppConfig):
 
     # def ready(self):
     #     logger.info("#################################\n"
-    #                 "Nalkiscloud API is up and running\n"
+    #                 "Nalkinscloud API is up and running\n"
     #                 "#################################")
     #     pass

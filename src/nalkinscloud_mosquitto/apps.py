@@ -10,7 +10,7 @@ class NalkinscloudMosquittoConfig(AppConfig):
     name = 'nalkinscloud_mosquitto'
 
     # def ready(self):
-    #     logger.info("###################################################\n"
-    #                 "Nalkiscloud Mosquitto Application is up and running\n"
-    #                 "###################################################")
+    #     logger.info("####################################################\n"
+    #                 "Nalkinscloud Mosquitto Application is up and running\n"
+    #                 "####################################################")
     #     pass

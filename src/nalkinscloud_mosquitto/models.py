@@ -100,7 +100,7 @@ class CustomerDevice(models.Model):
     date_created = models.DateTimeField(_('Date Created'),  auto_now_add=True, blank=True)
 
     def __str__(self):
-        return self.user_id.email + ' has device' + self.device_id.device_id
+        return self.user_id.email + ' <-> ' + self.device_id.device_id
 
     class Meta:
         unique_together = ('user_id', 'device_id',)  # Set primary combined key
