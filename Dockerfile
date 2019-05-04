@@ -4,6 +4,9 @@ FROM python:3.6-alpine
 MAINTAINER Arie Lev
 
 ENV PYTHONUNBUFFERED 1
+ARG PYPI_REPO="https://pypi.python.org/simple"
+ENV PYPI_REPO $PYPI_REPO
+
 RUN mkdir /nalkinscloud-api
 WORKDIR /nalkinscloud-api
 
@@ -11,7 +14,9 @@ WORKDIR /nalkinscloud-api
 RUN apk add --no-cache mariadb-dev build-base
 
 ADD src /nalkinscloud-api
-RUN pip install -r requirements.txt
+RUN pip install \
+    --index-url $PYPI_REPO \
+    --requirement requirements.txt
 
 ADD entrypoint.sh /nalkinscloud-api
 RUN chmod +x entrypoint.sh

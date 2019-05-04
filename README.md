@@ -7,7 +7,11 @@ This is Django server code, implementing REST API to support [NalkinsCloud](http
 The server will connect Android application to MQTT server and database.
 
 Create docker image   
-`docker build -t nalkinscloud/nalkinscloud-django-backend .`  
+```bash
+docker build \
+    -t nalkinscloud/nalkinscloud-django-backend \
+    --build-arg PYPI_REPO=https://nexus.nalkins.cloud/repository/pypi-repo/simple .
+```  
 
 Optional:
  - Tag image for private repo  
