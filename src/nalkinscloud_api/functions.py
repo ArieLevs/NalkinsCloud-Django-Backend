@@ -105,6 +105,16 @@ def is_email_exists(email):
     return User.objects.filter(email=email).exists()
 
 
+def is_client_id_exists(client_id):
+    """
+    Check if client_id exist in 'Application' model (oauth2_provider)
+
+    :param client_id: string
+    :return: True if client_secret exists
+    """
+    return Application.objects.filter(client_id=client_id).exists()
+
+
 def is_client_secret_exists(client_secret):
     """
     Check if client_secret exist in 'Application' model (oauth2_provider)

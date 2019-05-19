@@ -50,6 +50,10 @@ class TestAPIFunctions(TestCase):
         self.assertTrue(is_email_exists(email=self.email))
         self.assertFalse(is_email_exists(email='test2@nalkins.cloud'))
 
+    def test_is_client_id_exists(self):
+        self.assertTrue(is_client_id_exists(client_id=self.oauth_client_id))
+        self.assertFalse(is_client_id_exists(client_id='some_other_client_id'))
+
     def test_is_client_secret_exists(self):
         self.assertTrue(is_client_secret_exists(client_secret=self.oauth_client_secret))
         self.assertFalse(is_client_secret_exists(client_secret='some_other_client_secret'))
