@@ -26,7 +26,8 @@ logger = logging.getLogger(PROJECT_NAME)
 class HealthCheckView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         logger.info("HealthCheckView request at: " + str(datetime.datetime.now()))
 
         # Get token from request
@@ -44,7 +45,8 @@ class HealthCheckView(APIView):
 class RegistrationView(APIView):
     permission_classes = ()  # No Authentication needed here
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         serializer = RegistrationSerializer(data=request.data)
 
         # Check format and unique constraint
@@ -119,7 +121,8 @@ class RegistrationView(APIView):
 class DeviceActivationView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         serializer = DeviceActivationSerializer(data=request.data)
 
         if not serializer.is_valid():
@@ -189,7 +192,8 @@ class DeviceActivationView(APIView):
 class DeviceListView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         # Print request to log file
         logger.info("New DeviceList request at: " + str(datetime.datetime.now()))
 
@@ -228,7 +232,8 @@ class DeviceListView(APIView):
 class ForgotPasswordView(APIView):
     permission_classes = ()
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         serializer = ForgotPasswordSerializer(data=request.data)
 
         if not serializer.is_valid():
@@ -281,7 +286,8 @@ class ForgotPasswordView(APIView):
 class GetDevicePassView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         serializer = DeviceIdOnlySerializer(data=request.data)
 
         if not serializer.is_valid():
@@ -340,7 +346,8 @@ class GetDevicePassView(APIView):
 class GetScheduledJobView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         # Print request to log file
         logger.info("New GetScheduledJob request at: " + str(datetime.datetime.now()))
 
@@ -356,7 +363,7 @@ class GetScheduledJobView(APIView):
         json_array = []
         # Append current details (device) to the array
         json_array.append({"device_id": "device_id", "device_name": "just some name", "job_id": "some id"})
-        value = json_array  # Set the final json array to 'value'
+        # value = json_array  # Set the final json array to 'value'
         value = 'Scheduled jobs have not developed yet'
 
         return Response(build_json_response(message, value), status=status.HTTP_200_OK)
@@ -365,7 +372,8 @@ class GetScheduledJobView(APIView):
 class RemoveDeviceView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         serializer = DeviceIdOnlySerializer(data=request.data)
 
         if not serializer.is_valid():
@@ -417,7 +425,8 @@ class RemoveDeviceView(APIView):
 class ResetPasswordView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         serializer = ResetPasswordSerializer(data=request.data)
 
         if not serializer.is_valid():
@@ -456,7 +465,8 @@ class ResetPasswordView(APIView):
 class SetScheduledJobView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         logger.info("New SetScheduledJob request at: " + str(datetime.datetime.now()))
 
         serializer = SetScheduledJobSerializer(data=request.data)
@@ -539,7 +549,8 @@ class SetScheduledJobView(APIView):
 class DelScheduledJobView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         serializer = DeviceIdOnlySerializer(data=request.data)
 
         if not serializer.is_valid():
@@ -549,8 +560,6 @@ class DelScheduledJobView(APIView):
 
             data = serializer.data
             logger.info("Request Parameters: " + str(data))
-
-            device_id = data['device_id']
 
             # Get token from request
             token = request.auth
@@ -577,7 +586,8 @@ class DelScheduledJobView(APIView):
 class UpdateMQTTUserPassView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         logger.info("New UpdateMQTTUserPass request at: " + str(datetime.datetime.now()))
 
         # Get token from request
@@ -604,7 +614,8 @@ class UpdateMQTTUserPassView(APIView):
 class SetScheduledJobView2(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         logger.info("New SetScheduledJob request at: " + str(datetime.datetime.now()))
 
         logger.info("Request Parameters: " + str(request.data))
