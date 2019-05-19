@@ -18,62 +18,65 @@
     <link rel="shortcut icon" href="" type="image/x-icon"/>
 
     <!-- Bootstrap 4 core CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
     <!-- GitHub Bootstrap Social Buttons -->
     <link href="{% static 'bootstrap-social-gh-pages/bootstrap-social.css' %}" rel="stylesheet">
     <link href="{% static 'bootstrap-social-gh-pages/assets/css/font-awesome.css' %}" rel="stylesheet">
-    </head>
+</head>
 
 
-    <body id="page-top">
-        <!-- Navigation -->
-        <nav class="navbar navbar-expand-lg navbar-light" id="mainNav">
-            <div class="container" role="navigation">
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <a class="navbar-brand js-scroll-trigger" href="/#page-top">{{ project_name }}</a>
-                <div class="collapse navbar-collapse" id="navbarResponsive">
-                    <ul class="navbar-nav ml-auto">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link js-scroll-trigger" href="{% url 'logout_process' %}">Logout</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link js-scroll-trigger" href="{% url 'login_page' %}">Login</a>
-                        </li>
-                    {% endif %}
-                    </ul>
-
-                </div>
-
-            </div>
-
-        </nav>
-        {% block body_block %} {% endblock %}
-    </body>
-    <footer class="footer bg-light fixed-bottom">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-6 h-100 text-center text-lg-left my-auto">
-                    <ul class="list-inline mb-0">
-                        <li class="list-inline-item">
-                            <p class="text-muted small mb-4 mb-lg-0">Copyright &copy; {{ developer }} {{ current_year }}. All Rights Reserved.</p>
-                        </li>
-                    </ul>
-                    <ul class="list-inline mb-0">
-                        <li class="list-inline-item">
-                            <p class="text-muted small mb-4 mb-lg-0">Version: {{ version }}</p>
-                        </li>
-                        <li class="list-inline-item">|</li>
-                        <li class="list-inline-item">
-                            <p class="text-muted small mb-4 mb-lg-0">Environment: {{ environment }}</p>
-                        </li>
-                    </ul>
-                </div>
+<body id="page-top">
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light" id="mainNav">
+    <div class="container" role="navigation">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <a class="navbar-brand js-scroll-trigger" href="/#page-top">{{ project_name }}</a>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
                 {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link js-scroll-trigger" href="{% url 'logout_process' %}">Logout</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link js-scroll-trigger" href="{% url 'login_page' %}">Login</a>
+                    </li>
+                {% endif %}
+            </ul>
+
+        </div>
+
+    </div>
+
+</nav>
+{% block body_block %} {% endblock %}
+</body>
+<footer class="footer bg-light fixed-bottom">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 h-100 text-center text-lg-left my-auto">
+                <ul class="list-inline mb-0">
+                    <li class="list-inline-item">
+                        <p class="text-muted small mb-4 mb-lg-0">Copyright &copy; {{ developer }} {{ current_year }}.
+                            All Rights Reserved.</p>
+                    </li>
+                </ul>
+                <ul class="list-inline mb-0">
+                    <li class="list-inline-item">
+                        <p class="text-muted small mb-4 mb-lg-0">Version: {{ version }}</p>
+                    </li>
+                    <li class="list-inline-item">|</li>
+                    <li class="list-inline-item">
+                        <p class="text-muted small mb-4 mb-lg-0">Environment: {{ environment }}</p>
+                    </li>
+                </ul>
+            </div>
+            {% if user.is_authenticated %}
                 <div class="col-lg-6 h-100 text-center text-lg-right my-auto">
 
                     <!-- Print current users email -->
@@ -86,27 +89,38 @@
                     <!-- Print current users providers -->
                     <ul class="list-inline mb-0">
                         <li class="list-inline-item">
-                        <p class="text-muted small mb-4 mb-lg-0">Signed in via:</p>
+                            <p class="text-muted small mb-4 mb-lg-0">Signed in via:</p>
                         </li>
-                    {% for ass in backends.associated %}
-                        <li class="list-inline-item">
-                              {% if ass.provider == 'google-oauth2' %}
-                                  <p class="text-muted small mb-4 mb-lg-0">{{ ass.provider }}</p>
-                              {% endif %}
-                              {% if ass.provider == 'github' %}
-                                  <p class="text-muted small mb-4 mb-lg-0">{{ ass.provider }}</p>
-                              {% endif %}
-                        </li>
-                    {% endfor %}
+                        {% for ass in backends.associated %}
+                            <li class="list-inline-item">
+                                {% if ass.provider == 'google-oauth2' %}
+                                    <p class="text-muted small mb-4 mb-lg-0">{{ ass.provider }}</p>
+                                {% endif %}
+                                {% if ass.provider == 'github' %}
+                                    <p class="text-muted small mb-4 mb-lg-0">{{ ass.provider }}</p>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                        {% if backends.associate == None %}
+                            <li class="list-inline-item">
+                                <p class="text-muted small mb-4 mb-lg-0">local sign in</p>
+                            </li>
+                        {% endif %}
                     </ul>
 
                 </div>
-                {% endif %}
-            </div>
+            {% endif %}
         </div>
-    </footer>
+    </div>
+</footer>
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
 </html>
