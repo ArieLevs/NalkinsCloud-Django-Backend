@@ -18,6 +18,9 @@ RUN pip install \
     --index-url $PYPI_REPO \
     --requirement requirements.txt
 
+# Cleanup
+ENV PYPI_REPO 'None'
+
 ADD entrypoint.sh /nalkinscloud-api
 RUN chmod +x entrypoint.sh
 
