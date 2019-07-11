@@ -1,7 +1,7 @@
 import logging
 import datetime
 
-from nalkinscloud_django.settings import BASE_DIR, PROJECT_NAME, VERSION, ENVIRONMENT
+from nalkinscloud_django.settings import BASE_DIR, PROJECT_NAME, VERSION, HOSTNAME, ENVIRONMENT
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import logout
@@ -17,6 +17,7 @@ context = {
     'developer': 'Arie Lev',
     'current_year': datetime.datetime.now().year,
     'version': VERSION,
+    'hostname': HOSTNAME,
     'environment': ENVIRONMENT,
 }
 
