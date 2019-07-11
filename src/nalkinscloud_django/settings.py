@@ -1,7 +1,11 @@
-
 import os
+import socket
 
 ENVIRONMENT = os.environ.get('environment', 'dev')
+try:
+    HOSTNAME = socket.gethostname()
+except ImportError as e:
+    HOSTNAME = 'localhost'
 
 BACKEND_DOMAIN = os.environ.get('backend_domain', 'http://127.0.0.1:8000')
 FRONTEND_DOMAIN = os.environ.get('frontend_domain', 'http://127.0.0.1:8000')
@@ -17,7 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get('django_secret_key', 'djangoSecretKey')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-if ENVIRONMENT == 'dev':
+if 'dev' or 'ci' in ENVIRONMENT:
     DEBUG = True
     EXTRA_ALLOWED_HOSTS.append('*')
 else:
@@ -160,15 +164,15 @@ STATIC_URL = os.environ.get('static_url', "/static/")
 
 # STATIC_ROOT = "static/"
 
-# This setting defines the additional locations the staticfiles
-STATICFILES_DIRS = ['static/', ]
-
-# The absolute path to the directory where collectstatic will collect static files for deployment
 if ENVIRONMENT == 'ci':
+    # The absolute path to the directory where collectstatic will collect static files for deployment
     STATIC_ROOT = os.environ.get('static_root', os.path.join(BASE_DIR, "static"))
+else:
+    # This setting defines the additional locations the staticfiles
+    STATICFILES_DIRS = ['static/', ]
 
 FIXTURE_DIRS = (
-   os.path.join(BASE_DIR, 'nalkinscloud_mosquitto/fixtures'),
+    os.path.join(BASE_DIR, 'nalkinscloud_mosquitto/fixtures'),
 )
 
 ######################
