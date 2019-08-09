@@ -621,3 +621,27 @@ class SetScheduledJobView2(APIView):
         logger.info("Request Parameters: " + str(request.data))
 
         return Response("SDF", status=status.HTTP_200_OK)
+
+
+class ReadinessProbe(APIView):
+    permission_classes = ()  # No Authentication needed here
+
+    @staticmethod
+    def post(request):
+        return Response('ok', status=status.HTTP_200_OK)
+
+    @staticmethod
+    def get(request):
+        return Response('ok', status=status.HTTP_200_OK)
+
+
+class LivenessProbe(APIView):
+    permission_classes = ()  # No Authentication needed here
+
+    @staticmethod
+    def post(request):
+        return Response('ok', status=status.HTTP_200_OK)
+
+    @staticmethod
+    def get(request):
+        return Response('ok', status=status.HTTP_200_OK)

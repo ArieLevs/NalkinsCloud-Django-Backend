@@ -3,6 +3,8 @@ from django.conf.urls import url
 from . import views_api
 from . import views
 
+app_mame = "web_api"
+
 urlpatterns = [
     url(r'^$', views.index, name='index'),
 
@@ -16,6 +18,8 @@ urlpatterns = [
     url(r'^verify_account_failed/', views.verify_account_failed, name='verify_account_failed'),
 
     # REST API urls
+    url(r'^readiness/', views_api.ReadinessProbe.as_view(), name='readiness'),
+    url(r'^liveness/', views_api.LivenessProbe.as_view(), name='liveness'),
     url(r'^register/', views_api.RegistrationView.as_view(), name='register'),
     url(r'^health_check/', views_api.HealthCheckView.as_view(), name='health_check'),  # Auth require
     url(r'^device_activation/', views_api.DeviceActivationView.as_view(), name='device_activation'),  # Auth require
