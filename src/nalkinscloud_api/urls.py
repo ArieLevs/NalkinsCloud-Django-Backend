@@ -1,15 +1,15 @@
 from django.conf.urls import url
 
-from . import views_api
-from . import views
+from nalkinscloud_api import views, views_api
 
-app_mame = "web_api"
+app_name = 'nalkinscloud_api'
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
 
     # General
     url(r'^login_page/', views.login_page, name='login_page'),
+    url(r'^login_process/', views.login_process, name='login_process'),
     url(r'^logout_process/', views.logout_process, name='logout_process'),
 
     # Email verifications urls

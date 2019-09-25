@@ -2,13 +2,18 @@
 {% load static %}
 
 {% block body_block %}
-    <form class="text-center border border-light p-5">
-
+    <form class="text-center border border-light p-5"
+          method="POST"
+          action="{% url 'nalkinscloud_api:login_process' %}" id="login"
+          name="login_form" role="form">
+        {% csrf_token %}
         <!-- Email -->
-        <input type="email" id="defaultLoginFormEmail" class="form-control mb-4" placeholder="E-mail">
+        <input type="email" id="defaultLoginFormEmail" name="email" class="form-control mb-4"
+               placeholder="Email" value="" required="required">
 
         <!-- Password -->
-        <input type="password" id="defaultLoginFormPassword" class="form-control mb-4" placeholder="Password">
+        <input type="password" id="defaultLoginFormPassword" name="password" class="form-control mb-4"
+               placeholder="Password" value="" required="required">
 
         <div class="d-flex justify-content-around">
             <div>
@@ -24,9 +29,18 @@
             </div>
         </div>
 
+        {% if error %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endif %}
+
+
         <!-- Sign in button -->
         <button class="btn btn-info btn-block my-4" type="submit">Sign in</button>
+    </form>
 
+    <div class="text-center border border-light p-5">
         <!-- Register -->
         <p>Not a member?
             <a href="">Register</a>
@@ -46,5 +60,5 @@
                 <span class="fa fa-github"></span>
             </i>
         </a>
-    </form>
+    </div>
 {% endblock %}

@@ -4,7 +4,7 @@ import datetime
 from nalkinscloud_django.settings import BASE_DIR, PROJECT_NAME, VERSION, HOSTNAME, ENVIRONMENT
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
-from django.contrib.auth import logout
+from django.contrib.auth import logout, authenticate, login
 
 from django_user_email_extension.models import verify_record
 
@@ -94,3 +94,37 @@ def login_page(request):
             context,
             status=HttpResponse.status_code,
         )
+
+
+def login_process(request):
+    default_logger.info("login_process request at: " + str(datetime.datetime.now()))
+    default_logger.info(str(request))
+
+    if request.POST:
+        default_logger.info("post request received, moving on")
+        email = request.POST['email']
+        password = request.POST['password']
+
+        user = authenticate(request, email=email, password=password)
+        if user is not None:
+            default_logger.info("user: " + str(user) + " Authenticated, moving on")
+            if user.is_active:
+                default_logger.error("user: " + str(user) + " is active, perform login")
+                login(request, user)
+                return HttpResponseRedirect('/')
+            else:
+                default_logger.error("user: " + str(user) + " is not active, stop login, show error context")
+                context.update({'error': 'User is not active, please make sure your email was verified'})
+        else:
+            default_logger.error("email could not be authenticated, stop login, show error context")
+            context.update({'error': 'email could not be authenticated'})
+    else:
+        default_logger.error("no post received, stop login")
+        context.update({'error': 'bad request'})
+
+    return render(
+        request,
+        BASE_DIR + '/templates/login.html',
+        context,
+        status=HttpResponse.status_code
+    )
