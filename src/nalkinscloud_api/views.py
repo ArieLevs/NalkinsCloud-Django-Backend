@@ -1,12 +1,14 @@
 import logging
 import datetime
 
-from nalkinscloud_django.settings import BASE_DIR, PROJECT_NAME, VERSION, HOSTNAME, ENVIRONMENT
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import logout, authenticate, login
 
 from django_user_email_extension.models import verify_record
+
+from nalkinscloud_django.settings import BASE_DIR, PROJECT_NAME, VERSION, HOSTNAME, ENVIRONMENT
 
 # Define logger
 default_logger = logging.getLogger(PROJECT_NAME)
@@ -125,6 +127,18 @@ def login_process(request):
     return render(
         request,
         BASE_DIR + '/templates/login.html',
+        context,
+        status=HttpResponse.status_code
+    )
+
+
+@login_required
+def devices_view(request):
+    default_logger.info("devices_view request at: " + str(datetime.datetime.now()))
+
+    return render(
+        request,
+        BASE_DIR + '/templates/devices.html',
         context,
         status=HttpResponse.status_code
     )

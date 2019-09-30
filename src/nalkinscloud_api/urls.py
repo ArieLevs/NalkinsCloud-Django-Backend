@@ -32,4 +32,6 @@ urlpatterns = [
     url(r'^set_scheduled_job/', views_api.SetScheduledJobView.as_view(), name='set_scheduled_job'),  # Auth require
     url(r'^del_scheduled_job/', views_api.DelScheduledJobView.as_view(), name='del_scheduled_job'),  # Auth require
     url(r'^update_device_pass/', views_api.UpdateMQTTUserPassView.as_view(), name='update_device_pass'),  # Auth require
+
+    url(r'^devices/', views.devices_view, name='devices')
 ]
