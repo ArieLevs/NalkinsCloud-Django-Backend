@@ -14,6 +14,10 @@ PROJECT_NAME = 'nalkinscloud-api'
 VERSION = os.environ.get('version', 'null')
 EXTRA_ALLOWED_HOSTS = os.environ.get('allowed_hosts', '').split(',')
 
+# MQTT Broker
+MQTT_BROKER_HOST = os.environ.get('mqtt_broker_host', '127.0.0.1')
+MQTT_BROKER_PORT = int(os.environ.get('mqtt_broker_port', 9001))
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

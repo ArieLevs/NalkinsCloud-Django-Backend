@@ -9,7 +9,8 @@ from django.contrib.auth import logout, authenticate, login
 from django_user_email_extension.models import verify_record
 
 from nalkinscloud_mosquitto.functions import get_customers_devices
-from nalkinscloud_django.settings import BASE_DIR, PROJECT_NAME, VERSION, HOSTNAME, ENVIRONMENT
+from nalkinscloud_django.settings import BASE_DIR, PROJECT_NAME, VERSION, HOSTNAME, ENVIRONMENT,\
+    MQTT_BROKER_HOST, MQTT_BROKER_PORT
 
 # Define logger
 default_logger = logging.getLogger(PROJECT_NAME)
@@ -139,6 +140,7 @@ def login_process(request):
 def devices_view(request):
     default_logger.info("devices_view request at: " + str(datetime.datetime.now()))
     temp_context = context.copy()
+    temp_context.update({'broker_host': MQTT_BROKER_HOST, 'broker_port': MQTT_BROKER_PORT})
 
     device_list = get_customers_devices(request.user)
 
