@@ -15,6 +15,7 @@ jobs:
         python-version: 3.7
     - name: Install dependencies
       run: |
+        sudo apt install mariadb-server
         python -m pip install --upgrade pip
         pip install -r src/requirements.txt
     - name: Lint with flake8
