@@ -1,10 +1,10 @@
 # Make sure using python3 in order to install django 2.x and above
-django==2.2.5
+django==3.0.1
 
 django-user-email-extension
 
 apscheduler
-djangorestframework
+djangorestframework==3.11.0
 django-oauth-toolkit
 mysqlclient
 django-ipware
