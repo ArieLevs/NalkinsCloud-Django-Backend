@@ -105,7 +105,7 @@ class RegistrationView(APIView):
 
                     subject = 'Verify your NalkinsCloud account'
                     body = 'Follow this link to verify your account: ' + \
-                           FRONTEND_DOMAIN + '%s' % reverse('verify_account',
+                           FRONTEND_DOMAIN + '%s' % reverse('nalkinscloud_api:verify_account',
                                                             kwargs={'uuid': str(new_user.get_uuid_of_email())})
 
                     new_user.send_verification_email(subject=subject,

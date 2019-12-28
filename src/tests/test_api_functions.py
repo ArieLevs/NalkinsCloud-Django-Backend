@@ -68,15 +68,15 @@ class APIViewsTestCase(APITestCase):
         # Set current client with a token fot authentication
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(self.access_token))
 
-        self.health_check_url = reverse('health_check')
-        self.registration_url = reverse('register')
-        self.device_activation_url = reverse('device_activation')
-        self.device_list_url = reverse('device_list')
-        self.forgot_password_url = reverse('forgot_password')
-        self.get_device_pass_url = reverse('get_device_pass')
-        self.remove_device_url = reverse('remove_device')
-        self.reset_password_url = reverse('reset_password')
-        self.update_device_pass_url = reverse('update_device_pass')
+        self.health_check_url = reverse('nalkinscloud_api:health_check')
+        self.registration_url = reverse('nalkinscloud_api:register')
+        self.device_activation_url = reverse('nalkinscloud_api:device_activation')
+        self.device_list_url = reverse('nalkinscloud_api:device_list')
+        self.forgot_password_url = reverse('nalkinscloud_api:forgot_password')
+        self.get_device_pass_url = reverse('nalkinscloud_api:get_device_pass')
+        self.remove_device_url = reverse('nalkinscloud_api:remove_device')
+        self.reset_password_url = reverse('nalkinscloud_api:reset_password')
+        self.update_device_pass_url = reverse('nalkinscloud_api:update_device_pass')
 
     def test_registration(self):
         """
