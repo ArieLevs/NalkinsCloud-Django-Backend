@@ -1,15 +1,15 @@
 # Make sure using python3 in order to install django 2.x and above
-django==3.0.1
+django==3.0.4
 
-django-user-email-extension
+django-user-email-extension==1.0.10
 
-apscheduler
+apscheduler==3.6.3
 djangorestframework==3.11.0
-django-oauth-toolkit
-mysqlclient
-django-ipware
-pytz
-PyYAML
-graypy==1.1.1 # Graylog logger
-gunicorn
-social-auth-app-django
+django-oauth-toolkit==1.3.2
+mysqlclient==1.4.6
+django-ipware==2.1.0
+pytz==2019.3
+PyYAML==5.3.1
+graypy==2.1.0 # Graylog logger
+gunicorn==20.0.4
+social-auth-app-django==3.1.0
