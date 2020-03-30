@@ -1,5 +1,5 @@
 
-FROM python:3.6-alpine
+FROM python:3.7-alpine
 
 MAINTAINER Arie Lev
 
@@ -11,7 +11,7 @@ RUN mkdir /nalkinscloud-api
 WORKDIR /nalkinscloud-api
 
 # Needed for mysqlclient requirement when using python alpine image
-RUN apk add --no-cache mariadb-dev build-base
+RUN apk add --no-cache mariadb-dev build-base libffi-dev
 
 ADD src /nalkinscloud-api
 RUN pip install \
