@@ -1,17 +1,17 @@
-#!/bin/bash
+#!/bin/sh -e
 
 cd /nalkinscloud-api
 
 echo "#######################" 2>&1
 echo "Start Models Migrations" 2>&1
 echo "#######################" 2>&1
-python3.6 manage.py makemigrations
-python3.6 manage.py migrate
+python manage.py makemigrations
+python manage.py migrate
 
 #echo "####################" 2>&1
 #echo "Collect Static Files" 2>&1
 #echo "####################" 2>&1
-#python3.6 manage.py collectstatic --no-input
+#python manage.py collectstatic --no-input
 
 echo "#####################" 2>&1
 echo "Start Gunicorn server" 2>&1
