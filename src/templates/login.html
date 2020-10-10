@@ -4,7 +4,7 @@
 {% block body_block %}
     <form class="text-center border border-light p-5"
           method="POST"
-          action="{% url 'nalkinscloud_api:login_process' %}" id="login"
+          action="{% url 'nalkinscloud_ui:login_process' %}" id="login"
           name="login_form" role="form">
         {% csrf_token %}
         <!-- Email -->

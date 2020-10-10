@@ -87,6 +87,9 @@ TEMPLATES = [
                 # Social auth templates
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
+
+                # custom processors
+                'nalkinscloud_ui.context_processors.metadata',
             ],
         },
     },

@@ -1,5 +1,4 @@
 import logging
-import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -9,21 +8,10 @@ from django.contrib.auth import logout, authenticate, login
 from django_user_email_extension.models import verify_record
 
 from nalkinscloud_mosquitto.functions import get_customers_devices
-from nalkinscloud_django.settings import BASE_DIR, PROJECT_NAME, VERSION, HOSTNAME, ENVIRONMENT,\
-    MQTT_BROKER_HOST, MQTT_BROKER_PORT
+from nalkinscloud_django.settings import MQTT_BROKER_HOST, MQTT_BROKER_PORT
 
 # Define logger
 default_logger = logging.getLogger(__name__)
-
-# Define global context values
-context = {
-    'project_name': PROJECT_NAME,
-    'developer': 'Arie Lev',
-    'current_year': datetime.datetime.now().year,
-    'version': VERSION,
-    'hostname': HOSTNAME,
-    'environment': ENVIRONMENT,
-}
 
 
 # Render main index page
@@ -33,8 +21,7 @@ def index(request):
 
     return render(
         request,
-        BASE_DIR + '/templates/index.html',
-        context,
+        template_name='index.html',
         status=HttpResponse.status_code,
     )
 
@@ -60,8 +47,7 @@ def verify_account_successful(request):
 
     return render(
         request,
-        BASE_DIR + '/templates/email_verification/email_verification_success.html',
-        context,
+        template_name='email_verification/email_verification_success.html',
         status=HttpResponse.status_code,
     )
 
@@ -72,8 +58,7 @@ def verify_account_failed(request):
 
     return render(
         request,
-        BASE_DIR + '/templates/email_verification/email_verification_failed.html',
-        context,
+        template_name='email_verification/email_verification_failed.html',
         status=HttpResponse.status_code,
     )
 
@@ -94,8 +79,7 @@ def login_page(request):
     else:
         return render(
             request,
-            BASE_DIR + '/templates/login.html',
-            context,
+            template_name='login.html',
             status=HttpResponse.status_code,
         )
 
@@ -104,7 +88,7 @@ def login_process(request):
     default_logger.info("login_process request")
     default_logger.info(str(request))
 
-    temp_context = context.copy()
+    context = {}
 
     if request.POST:
         default_logger.info("post request received, moving on")
@@ -120,18 +104,18 @@ def login_process(request):
                 return HttpResponseRedirect('/')
             else:
                 default_logger.error("user: " + str(user) + " is not active, stop login, show error context")
-                temp_context.update({'error': 'User is not active, please make sure your email was verified'})
+                context.update({'error': 'User is not active, please make sure your email was verified'})
         else:
             default_logger.error("email could not be authenticated, stop login, show error context")
-            temp_context.update({'error': 'email could not be authenticated'})
+            context.update({'error': 'email could not be authenticated'})
     else:
         default_logger.error("no post received, stop login")
-        temp_context.update({'error': 'bad request'})
+        context.update({'error': 'bad request'})
 
     return render(
         request,
-        BASE_DIR + '/templates/login.html',
-        temp_context,
+        template_name='login.html',
+        context=context,
         status=HttpResponse.status_code
     )
 
@@ -139,8 +123,8 @@ def login_process(request):
 @login_required
 def devices_view(request):
     default_logger.info("devices_view request")
-    temp_context = context.copy()
-    temp_context.update({'broker_host': MQTT_BROKER_HOST, 'broker_port': MQTT_BROKER_PORT})
+    context = {}
+    context.update({'broker_host': MQTT_BROKER_HOST, 'broker_port': MQTT_BROKER_PORT})
 
     device_list = get_customers_devices(request.user)
 
@@ -159,12 +143,11 @@ def devices_view(request):
             tmp_json = {"device_id": device_id, "device_name": device_name, "device_type": device_type}
 
             json_array.append(tmp_json)  # Append current details (device) to the array
-        temp_context.update({'device_list': json_array})
+        context.update({'device_list': json_array})
 
-    print('current context: ' + str(temp_context))
     return render(
         request,
-        BASE_DIR + '/templates/devices.html',
-        temp_context,
+        template_name='devices.html',
+        context=context,
         status=HttpResponse.status_code
     )

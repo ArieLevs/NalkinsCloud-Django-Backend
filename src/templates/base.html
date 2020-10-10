@@ -40,11 +40,11 @@
             <ul class="navbar-nav ml-auto">
                 {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link js-scroll-trigger" href="{% url 'nalkinscloud_api:logout_process' %}">Logout</a>
+                        <a class="nav-link js-scroll-trigger" href="{% url 'nalkinscloud_ui:logout_process' %}">Logout</a>
                     </li>
                 {% else %}
                     <li class="nav-item">
-                        <a class="nav-link js-scroll-trigger" href="{% url 'nalkinscloud_api:login_page' %}">Login</a>
+                        <a class="nav-link js-scroll-trigger" href="{% url 'nalkinscloud_ui:login_page' %}">Login</a>
                     </li>
                 {% endif %}
             </ul>
