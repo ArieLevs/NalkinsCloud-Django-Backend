@@ -1,5 +1,5 @@
 import logging
-from ipware.ip import get_real_ip
+from ipware.ip import get_client_ip
 
 from nalkinscloud_django.settings import PROJECT_NAME, FRONTEND_DOMAIN, EMAIL_HOST_USER
 from nalkinscloud_api.scheduler import schedule_new_job, remove_job_by_id
@@ -58,10 +58,9 @@ class RegistrationView(APIView):
         data = serializer.data
         logger.info("Request Parameters: " + str(data))
 
-        ip = get_real_ip(request)
-        if ip is not None:
-            logger.error('Could not detect IP of request')
-            ip = '0.0.0.0'
+        client_ip, is_routable = get_client_ip(request)
+        if client_ip is None:
+            client_ip = '0.0.0.0'
 
         # Get CLIENT_SECRET from DB ( if user is using a verified software
         if not is_client_secret_exists(data['client_secret']):
@@ -86,7 +85,7 @@ class RegistrationView(APIView):
 
                 logger.info("Setting up MQTT broker db info")
                 # Add new "device" (customer) to the devices table
-                if not insert_new_client_to_devices(data['email'], data['password'], ip):
+                if not insert_new_client_to_devices(data['email'], data['password'], client_ip):
                     message = 'failed'
                     value = 'Registration Error occur'
                     response_code = status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -96,7 +95,7 @@ class RegistrationView(APIView):
                     device = Device.objects.get(device_id=data['email'])
                     insert_into_access_list(device, data['email'] + "/#")
 
-                    new_user.registration_ip = ip
+                    new_user.registration_ip = client_ip
                     new_user.is_active = False
                     new_user.save()
 
@@ -246,10 +245,9 @@ class ForgotPasswordView(APIView):
 
             client_secret = data['client_secret']
 
-            ip = get_real_ip(request)
-            if ip is None:
-                logger.error('Could not detect IP of request')
-                ip = 'none'
+            client_ip, is_routable = get_client_ip(request)
+            if client_ip is None:
+                client_ip = '0.0.0.0'
 
             # Get CLIENT_SECRET from DB ( if user is using a verified software )
             if not is_client_secret_exists(client_secret):
