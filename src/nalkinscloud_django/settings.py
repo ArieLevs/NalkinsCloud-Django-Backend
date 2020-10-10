@@ -11,6 +11,7 @@ BACKEND_DOMAIN = os.environ.get('backend_domain', 'http://127.0.0.1:8000')
 FRONTEND_DOMAIN = os.environ.get('frontend_domain', 'http://127.0.0.1:8000')
 
 PROJECT_NAME = 'nalkinscloud-api'
+APP_NAME = 'nalkinscloud_api'
 VERSION = os.environ.get('version', 'null')
 EXTRA_ALLOWED_HOSTS = os.environ.get('allowed_hosts', '').split(',')
 
@@ -253,7 +254,7 @@ CELERY_BEAT_SCHEDULE = {}
 ######################
 # LOGGING SETTINGS
 ######################
-LOG_LEVEL = os.environ.get('log_level', 'INFO')
+LOG_LEVEL = os.environ.get('log_level', 'DEBUG')
 
 GRAYLOG_ENABLED = os.environ.get('graylog_enabled', False) == 'True'
 GRAYLOG_HOST = os.environ.get('graylog_host', 'localhost')
@@ -266,10 +267,20 @@ else:
 
 LOGGING = {
     'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'basic': {
+            'format': '%(asctime)s %(name)-8s %(levelname)-8s %(message)s',
+        },
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
     'filters': {
         'fields': {
-            '()': 'nalkinscloud_api.logging_filter.FieldFilter',
             'fields': {
+                '()': 'nalkinscloud_api.logging_filter.FieldFilter',
                 'application': PROJECT_NAME,
                 'environment': ENVIRONMENT,
             },
@@ -285,11 +296,16 @@ LOGGING = {
         'console': {
             'level': LOG_LEVEL,
             'class': 'logging.StreamHandler',
+            'formatter': 'basic',
         },
     },
 
     'loggers': {
-        PROJECT_NAME: {
+        'django': {
+            'handlers': ['console'],
+            'propagate': True,
+        },
+        APP_NAME: {
             'handlers': HANDLERS,
             'level': LOG_LEVEL,
         },

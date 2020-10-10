@@ -1,14 +1,19 @@
 import logging
 from ipware.ip import get_client_ip
 
-from nalkinscloud_django.settings import PROJECT_NAME, FRONTEND_DOMAIN, EMAIL_HOST_USER
+from nalkinscloud_django.settings import FRONTEND_DOMAIN, EMAIL_HOST_USER
 from nalkinscloud_api.scheduler import schedule_new_job, remove_job_by_id
-from nalkinscloud_mosquitto.functions import *
-from nalkinscloud_api.functions import *
-from django_user_email_extension.models import *
+from nalkinscloud_mosquitto.functions import insert_into_access_list, is_device_id_exists, \
+    insert_new_client_to_devices, is_device_owned_by_user, device_has_any_owner, get_customers_devices, \
+    insert_into_customer_devices, update_device_pass, remove_from_customer_devices, remove_from_access_list
+from nalkinscloud_mosquitto.models import Device
+from nalkinscloud_api.functions import build_json_response, is_client_secret_exists, is_email_exists, \
+    generate_user_name, generate_random_8_char_string, hash_pbkdf2_sha256_password, get_utc_datetime
+from django_user_email_extension.models import User
 
 # Import serializers
-from nalkinscloud_api.serializers import *
+from nalkinscloud_api.serializers import RegistrationSerializer, DeviceActivationSerializer, ForgotPasswordSerializer, \
+    DeviceIdOnlySerializer, ResetPasswordSerializer, SetScheduledJobSerializer
 
 # REST Framework
 from rest_framework.response import Response
@@ -20,7 +25,7 @@ from django.contrib.auth.forms import PasswordResetForm
 from django.urls import reverse
 
 # Define logger
-logger = logging.getLogger(PROJECT_NAME)
+logger = logging.getLogger(__name__)
 
 
 class HealthCheckView(APIView):
@@ -28,7 +33,7 @@ class HealthCheckView(APIView):
 
     @staticmethod
     def post(request):
-        logger.info("HealthCheckView request at: " + str(datetime.datetime.now()))
+        logger.info("HealthCheckView request")
 
         # Get token from request
         token = request.auth
@@ -53,7 +58,7 @@ class RegistrationView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        logger.info("New Registration request at: " + str(datetime.datetime.now()))
+        logger.info("New Registration request")
 
         data = serializer.data
         logger.info("Request Parameters: " + str(data))
@@ -127,7 +132,7 @@ class DeviceActivationView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            logger.info("New DeviceActivation request at: " + str(datetime.datetime.now()))
+            logger.info("New DeviceActivation request")
 
             data = serializer.data
             logger.info("Request Parameters: " + str(data))
@@ -194,7 +199,7 @@ class DeviceListView(APIView):
     @staticmethod
     def post(request):
         # Print request to log file
-        logger.info("New DeviceList request at: " + str(datetime.datetime.now()))
+        logger.info("New DeviceList request")
 
         token = request.auth
         email = token.user
@@ -238,7 +243,7 @@ class ForgotPasswordView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            logger.info("New ForgotPassword request at: " + str(datetime.datetime.now()))
+            logger.info("New ForgotPassword request")
 
             data = serializer.data
             logger.info("Request Parameters: " + str(data))
@@ -291,7 +296,7 @@ class GetDevicePassView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            logger.info("New GetDevicePass request at: " + str(datetime.datetime.now()))
+            logger.info("New GetDevicePass request")
 
             data = serializer.data
             logger.info("Request Parameters: " + str(data))
@@ -347,7 +352,7 @@ class GetScheduledJobView(APIView):
     @staticmethod
     def post(request):
         # Print request to log file
-        logger.info("New GetScheduledJob request at: " + str(datetime.datetime.now()))
+        logger.info("New GetScheduledJob request")
 
         token = request.auth
         email = token.user
@@ -377,7 +382,7 @@ class RemoveDeviceView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            logger.info("New RemoveDevice request at: " + str(datetime.datetime.now()))
+            logger.info("New RemoveDevice request")
 
             data = serializer.data
             logger.info("Request Parameters: " + str(data))
@@ -430,7 +435,7 @@ class ResetPasswordView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            logger.info("New ResetPassword request at: " + str(datetime.datetime.now()))
+            logger.info("New ResetPassword request")
 
             data = serializer.data
             logger.info("Request Parameters: " + str(data))
@@ -465,7 +470,7 @@ class SetScheduledJobView(APIView):
 
     @staticmethod
     def post(request):
-        logger.info("New SetScheduledJob request at: " + str(datetime.datetime.now()))
+        logger.info("New SetScheduledJob request")
 
         serializer = SetScheduledJobSerializer(data=request.data)
 
@@ -490,12 +495,14 @@ class SetScheduledJobView(APIView):
                 value = 'You cannot set new job for this device'
                 logger.error("User %s is not owner of device %s" % (user_id, device_id))
             else:
+                from datetime import datetime
+
                 # This 'local_start_date' time, in this format:
                 # datetime.datetime(2017, 5, 24, 11, 45, tzinfo=datetime.timezone(datetime.timedelta(0, 10800)))
                 # the tzinfo represents a local GMT time
                 # get start datetime object (local time) from json
-                local_start_date = datetime.datetime.strptime(data["start_date_time"]["start_date_time_values"],
-                                                              '%Y-%m-%d %H:%M:%S%z')
+                local_start_date = datetime.strptime(data["start_date_time"]["start_date_time_values"],
+                                                     '%Y-%m-%d %H:%M:%S%z')
 
                 # This 'utc_date' time, in this format:
                 # datetime.datetime(2017, 5, 31, 10, 4, tzinfo=<UTC>), In UTC time
@@ -519,8 +526,8 @@ class SetScheduledJobView(APIView):
                 # datetime.datetime(2017, 5, 24, 11, 45, tzinfo=datetime.timezone(datetime.timedelta(0, 10800)))
                 # the tzinfo represents a local GMT time
                 # get start datetime object (local time) from json
-                local_end_date = datetime.datetime.strptime(data["end_date_time"]["end_date_time_values"],
-                                                            '%Y-%m-%d %H:%M:%S%z')
+                local_end_date = datetime.strptime(data["end_date_time"]["end_date_time_values"],
+                                                   '%Y-%m-%d %H:%M:%S%z')
 
                 # This 'utc_date' time, in this format:
                 # datetime.datetime(2017, 5, 31, 10, 4, tzinfo=<UTC>), In UTC time
@@ -554,7 +561,7 @@ class DelScheduledJobView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            logger.info("New DelScheduledJob request at: " + str(datetime.datetime.now()))
+            logger.info("New DelScheduledJob request")
 
             data = serializer.data
             logger.info("Request Parameters: " + str(data))
@@ -586,7 +593,7 @@ class UpdateMQTTUserPassView(APIView):
 
     @staticmethod
     def post(request):
-        logger.info("New UpdateMQTTUserPass request at: " + str(datetime.datetime.now()))
+        logger.info("UpdateMQTTUserPass request")
 
         # Get token from request
         token = request.auth
@@ -614,10 +621,7 @@ class SetScheduledJobView2(APIView):
 
     @staticmethod
     def post(request):
-        logger.info("New SetScheduledJob request at: " + str(datetime.datetime.now()))
-
-        logger.info("Request Parameters: " + str(request.data))
-
+        logger.info("SetScheduledJob Request Parameters: " + str(request.data))
         return Response("SDF", status=status.HTTP_200_OK)
 
 
@@ -638,8 +642,10 @@ class LivenessProbe(APIView):
 
     @staticmethod
     def post(request):
+        logger.debug("liveness_probe request")
         return Response('ok', status=status.HTTP_200_OK)
 
     @staticmethod
     def get(request):
+        logger.debug("liveness_probe request")
         return Response('ok', status=status.HTTP_200_OK)

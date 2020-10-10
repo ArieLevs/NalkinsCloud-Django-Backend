@@ -1,2 +1,2 @@
 
-default_app_config = 'nalkinscloud_api.apps.NalkinsCloudAPIConfig'
+# default_app_config = 'nalkinscloud_api.apps.NalkinsCloudAPIConfig'

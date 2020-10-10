@@ -13,7 +13,7 @@ from nalkinscloud_django.settings import BASE_DIR, PROJECT_NAME, VERSION, HOSTNA
     MQTT_BROKER_HOST, MQTT_BROKER_PORT
 
 # Define logger
-default_logger = logging.getLogger(PROJECT_NAME)
+default_logger = logging.getLogger(__name__)
 
 # Define global context values
 context = {
@@ -28,7 +28,7 @@ context = {
 
 # Render main index page
 def index(request):
-    default_logger.info("index request at: " + str(datetime.datetime.now()))
+    default_logger.info("index request")
     default_logger.info(request)
 
     return render(
@@ -41,7 +41,7 @@ def index(request):
 
 def verify_account(request, uuid):
 
-    default_logger.info("verify_account request at: " + str(datetime.datetime.now()))
+    default_logger.info("verify_account request")
     default_logger.info(request)
 
     try:
@@ -55,7 +55,7 @@ def verify_account(request, uuid):
 
 
 def verify_account_successful(request):
-    default_logger.info("verify_account_successful request at: " + str(datetime.datetime.now()))
+    default_logger.info("verify_account_successful request")
     default_logger.info(request)
 
     return render(
@@ -67,7 +67,7 @@ def verify_account_successful(request):
 
 
 def verify_account_failed(request):
-    default_logger.info("verify_account_failed request at: " + str(datetime.datetime.now()))
+    default_logger.info("verify_account_failed request")
     default_logger.info(request)
 
     return render(
@@ -79,14 +79,14 @@ def verify_account_failed(request):
 
 
 def logout_process(request):
-    default_logger.info("logout_process request at: " + str(datetime.datetime.now()) + " by user: " + str(request.user))
+    default_logger.info("logout_process request" + " by user: " + str(request.user))
 
     logout(request)
     return HttpResponseRedirect('/')
 
 
 def login_page(request):
-    default_logger.info("login_page request at: " + str(datetime.datetime.now()))
+    default_logger.info("login_page request")
     default_logger.info(request)
 
     if request.user.is_authenticated:
@@ -101,7 +101,7 @@ def login_page(request):
 
 
 def login_process(request):
-    default_logger.info("login_process request at: " + str(datetime.datetime.now()))
+    default_logger.info("login_process request")
     default_logger.info(str(request))
 
     temp_context = context.copy()
@@ -138,7 +138,7 @@ def login_process(request):
 
 @login_required
 def devices_view(request):
-    default_logger.info("devices_view request at: " + str(datetime.datetime.now()))
+    default_logger.info("devices_view request")
     temp_context = context.copy()
     temp_context.update({'broker_host': MQTT_BROKER_HOST, 'broker_port': MQTT_BROKER_PORT})
 

@@ -1,14 +1,10 @@
 
 from django.apps import AppConfig
-import logging
-from nalkinscloud_django.settings import PROJECT_NAME
-
-# Define logger
-logger = logging.getLogger(PROJECT_NAME)
+from django.conf import settings
 
 
 class NalkinsCloudAPIConfig(AppConfig):
-    name = 'nalkinscloud_api'
+    name = settings.APP_NAME
 
     # def ready(self):
     #     logger.info("#################################\n"
