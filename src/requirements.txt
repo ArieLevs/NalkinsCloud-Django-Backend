@@ -12,4 +12,6 @@ pytz==2020.1
 PyYAML==5.3.1
 graypy==2.1.0 # Graylog logger
 gunicorn==20.0.4
-social-auth-app-django==4.0.0
+# source code: https://github.com/pennersr/django-allauth
+# documentation: https://django-allauth.readthedocs.io/en/latest/installation.html
+django-allauth==0.42.0

@@ -1,19 +1,19 @@
 from django.contrib import admin
-from django.conf.urls import include, url
-from django.urls import path
+from django.urls import path, include
 
 urlpatterns = [
-    url(r'^', include('nalkinscloud_ui.urls')),
+    path('', include('nalkinscloud_ui.urls')),
 
     # api urls
     path('api/', include('nalkinscloud_api.urls')),
 
     # OAUTH URLS
-    url(r'^', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    path('', include('oauth2_provider.urls', namespace='oauth2_provider')),
     # Django auth urls
-    url('^', include('django.contrib.auth.urls')),
-    # Social auth urls
-    url('', include('social_django.urls', namespace='social')),
+    path('', include('django.contrib.auth.urls')),
+
+    # all auth
+    path('accounts/', include('allauth.urls')),
 
     path('nalkinsadmin/', admin.site.urls),
 ]
