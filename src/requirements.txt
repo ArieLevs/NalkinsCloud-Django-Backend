@@ -1,7 +1,7 @@
 # Make sure using python3 in order to install django 2.x and above
 django==3.1.2
 
-django-user-email-extension==2.0.1
+django-user-email-extension==2.1.2
 
 apscheduler==3.6.3
 djangorestframework==3.12.1

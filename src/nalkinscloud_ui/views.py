@@ -1,11 +1,14 @@
 import logging
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import logout, authenticate, login
+from django.views.generic import UpdateView
+from django.contrib import messages
 
-from django_user_email_extension.models import verify_record
+from django_user_email_extension.models import DjangoEmailVerifier
+from django_user_email_extension.forms import VerificationUUIDForm
 
 from nalkinscloud_mosquitto.functions import get_customers_devices
 from nalkinscloud_django.settings import MQTT_BROKER_HOST, MQTT_BROKER_PORT
@@ -16,9 +19,6 @@ default_logger = logging.getLogger(__name__)
 
 # Render main index page
 def index(request):
-    default_logger.info("index request")
-    default_logger.info(request)
-
     return render(
         request,
         template_name='index.html',
@@ -26,46 +26,29 @@ def index(request):
     )
 
 
-def verify_account(request, uuid):
+class VerifyEmailUUIDView(UpdateView):
+    form_class = VerificationUUIDForm
+    model = DjangoEmailVerifier
+    template_name = 'email_verification/email_verification_complete.html'
 
-    default_logger.info("verify_account request")
-    default_logger.info(request)
+    slug_field = 'verification_uuid'
+    slug_url_kwarg = 'verification_uuid'
 
-    try:
-        if verify_record(uuid_value=uuid):
-            return redirect('/verify_account_successful/')
-    except Exception as e:
-        default_logger.info(e)
-        pass
+    def get(self, request, *args, **kwargs):
+        verification_uuid = self.get_object()
 
-    return redirect('/verify_account_failed/')
+        try:
+            verification_uuid.verify_record()
+            messages.error(self.request, "successfully verified email: {}".format(verification_uuid.email))
+        except Exception as e:
+            # in case of exception, add returned message from verify_record()
+            messages.error(self.request, "{}".format(e))
 
-
-def verify_account_successful(request):
-    default_logger.info("verify_account_successful request")
-    default_logger.info(request)
-
-    return render(
-        request,
-        template_name='email_verification/email_verification_success.html',
-        status=HttpResponse.status_code,
-    )
-
-
-def verify_account_failed(request):
-    default_logger.info("verify_account_failed request")
-    default_logger.info(request)
-
-    return render(
-        request,
-        template_name='email_verification/email_verification_failed.html',
-        status=HttpResponse.status_code,
-    )
+        return super().get(request, *args, **kwargs)
 
 
 def logout_process(request):
-    default_logger.info("logout_process request" + " by user: " + str(request.user))
-
+    default_logger.info("logout_process request by user: " + str(request.user))
     logout(request)
     return HttpResponseRedirect('/')
 

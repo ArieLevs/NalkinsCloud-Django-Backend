@@ -7,13 +7,19 @@
             <div class="row">
                 <div class="col-lg-10 mx-auto">
                     <h1 class="text-uppercase">
-                        <h1>Somethings wrong - Nalkins Cloud Account Verification Failed</h1>
+                        <h1>Nalkins Cloud Account Verification</h1>
                     </h1>
+                    {% if messages %}
+                        {% for message in messages %}
+                            <h2 class="text-white-50 mx-auto mt-2 mb-5">{{ message }}</h2>
+                        {% endfor %}
+                    {% endif %}
                     <hr>
                 </div>
                 <div class="col-lg-8 mx-auto">
                     <p class="text-faded mb-5">Project By {{ developer }}</p>
-                    <a class="btn btn-primary btn-xl js-scroll-trigger" href="https://github.com/ArieLevs/NalkinsCloud">Nalkins Cloud on GitHub</a>
+                    <a class="btn btn-primary btn-xl js-scroll-trigger" href="https://github.com/ArieLevs/NalkinsCloud">Nalkins
+                        Cloud on GitHub</a>
                 </div>
             </div>
         </div>

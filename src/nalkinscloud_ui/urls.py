@@ -13,9 +13,7 @@ urlpatterns = [
     path('logout_process/', views.logout_process, name='logout_process'),
 
     # Email verifications urls
-    path('verify_account/<uuid:uuid>/', views.verify_account, name='verify_account'),
-    path('verify_account_successful/', views.verify_account_successful, name='verify_account_successful'),
-    path('verify_account_failed/', views.verify_account_failed, name='verify_account_failed'),
+    path('verify_account/<uuid:verification_uuid>/', views.VerifyEmailUUIDView.as_view(), name='verify_account'),
 
     path('devices/', views.devices_view, name='devices')
 ]
