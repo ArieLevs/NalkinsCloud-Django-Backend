@@ -312,6 +312,10 @@ LOGGING = {
             'handlers': HANDLERS,
             'level': LOG_LEVEL,
         },
+        'nalkinscloud_ui': {
+            'handlers': HANDLERS,
+            'level': LOG_LEVEL,
+        },
         'django.request': {
             'handlers': HANDLERS,
             'level': 'WARNING',
