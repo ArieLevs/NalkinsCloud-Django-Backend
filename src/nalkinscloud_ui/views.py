@@ -1,17 +1,15 @@
 import logging
 
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import logout, authenticate, login
-from django.views.generic import UpdateView
+from django.views.generic import UpdateView, ListView
 from django.contrib import messages
 
 from django_user_email_extension.models import DjangoEmailVerifier
 from django_user_email_extension.forms import VerificationUUIDForm
 
-from nalkinscloud_mosquitto.functions import get_customers_devices
-from nalkinscloud_django.settings import MQTT_BROKER_HOST, MQTT_BROKER_PORT
+from nalkinscloud_mosquitto.models import CustomerDevice
 
 # Define logger
 default_logger = logging.getLogger(__name__)
@@ -45,6 +43,21 @@ class VerifyEmailUUIDView(UpdateView):
             messages.error(self.request, "{}".format(e))
 
         return super().get(request, *args, **kwargs)
+
+
+class DevicesListView(ListView):
+    # set context object name, template will iterate over this object
+    context_object_name = "device_list"
+    template_name = 'devices.html'
+    page_title = 'User Devices'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.setdefault('page_title', self.page_title)
+        return context
+
+    def get_queryset(self):
+        return CustomerDevice.objects.filter(user_id=self.request.user)
 
 
 def logout_process(request):
@@ -98,39 +111,6 @@ def login_process(request):
     return render(
         request,
         template_name='login.html',
-        context=context,
-        status=HttpResponse.status_code
-    )
-
-
-@login_required
-def devices_view(request):
-    default_logger.info("devices_view request")
-    context = {}
-    context.update({'broker_host': MQTT_BROKER_HOST, 'broker_port': MQTT_BROKER_PORT})
-
-    device_list = get_customers_devices(request.user)
-
-    if not device_list:
-        default_logger.info('no devices found')
-    else:
-        default_logger.info("user: " + str(request.user.email) + " devices found: " + str(device_list))
-
-        json_array = []
-        # Build Json array from the 'device_list' response from the DB
-        for device in device_list:
-            device_id = str(device.device_id)
-            device_name = str(device.device_name)
-            device_type = str(device.device_id.type)
-
-            tmp_json = {"device_id": device_id, "device_name": device_name, "device_type": device_type}
-
-            json_array.append(tmp_json)  # Append current details (device) to the array
-        context.update({'device_list': json_array})
-
-    return render(
-        request,
-        template_name='devices.html',
         context=context,
         status=HttpResponse.status_code
     )

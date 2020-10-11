@@ -3,6 +3,7 @@
 
 {% block body_block %}
     <header class="masthead text-center text-white d-flex" style="background:#cccccc !important;">
+    <h1>{{ page_title }}</h1>
         <div class="container my-auto">
             <div class="row">
 
@@ -11,7 +12,7 @@
 
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <i class="fa fa-tasks fa-fw"></i> {{ device.device_type }}
+                            <i class="fa fa-tasks fa-fw"></i> {{ device.device_id.type }}
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
