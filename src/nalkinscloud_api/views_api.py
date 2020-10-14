@@ -4,22 +4,24 @@ from ipware.ip import get_client_ip
 from nalkinscloud_django.settings import FRONTEND_DOMAIN, EMAIL_HOST_USER
 from nalkinscloud_api.scheduler import schedule_new_job, remove_job_by_id
 from nalkinscloud_mosquitto.functions import insert_into_access_list, is_device_id_exists, \
-    insert_new_client_to_devices, is_device_owned_by_user, device_has_any_owner, get_customers_devices, \
+    insert_new_client_to_devices, is_device_owned_by_user, device_has_any_owner, \
     insert_into_customer_devices, update_device_pass, remove_from_customer_devices, remove_from_access_list
-from nalkinscloud_mosquitto.models import Device
+from nalkinscloud_mosquitto.models import Device, CustomerDevice
 from nalkinscloud_api.functions import build_json_response, is_client_secret_exists, is_email_exists, \
     generate_user_name, generate_random_8_char_string, hash_pbkdf2_sha256_password, get_utc_datetime
 from django_user_email_extension.models import User
 
 # Import serializers
 from nalkinscloud_api.serializers import RegistrationSerializer, DeviceActivationSerializer, ForgotPasswordSerializer, \
-    DeviceIdOnlySerializer, ResetPasswordSerializer, SetScheduledJobSerializer
+    DeviceIdOnlySerializer, ResetPasswordSerializer, SetScheduledJobSerializer, CustomerDeviceSerializer
 
 # REST Framework
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
+from rest_framework.exceptions import NotFound
 
 from django.contrib.auth.forms import PasswordResetForm
 from django.urls import reverse
@@ -193,44 +195,17 @@ class DeviceActivationView(APIView):
             return Response(build_json_response(message, value), status=response_code)
 
 
-class DeviceListView(APIView):
+class DeviceListView(ListAPIView):
     permission_classes = (IsAuthenticated,)
+    serializer_class = CustomerDeviceSerializer
+    model = CustomerDevice
 
-    @staticmethod
-    def post(request):
-        # Print request to log file
-        logger.info("New DeviceList request")
-
-        token = request.auth
-        email = token.user
-        user_id = token.user_id
-        logger.info("request from user: " + str(email))
-
-        device_list = get_customers_devices(user_id)  # Get list of devices from the DB
-        if not device_list:
-            message = 'failed'
-            value = 'no devices found'
-            response_code = status.HTTP_204_NO_CONTENT
-            logger.info('No devices found')
+    def get_queryset(self):
+        result = self.model.objects.filter(user_id=self.request.user)
+        if result:
+            return result
         else:
-            logger.info("User: " + str(email) + " Devices found: " + str(device_list))
-
-            json_array = []
-            # Build Json array from the 'device_list' response from the DB
-            for device in device_list:
-                device_id = str(device.device_id)
-                device_name = str(device.device_name)
-                device_type = str(device.device_id.type)
-
-                tmp_json = {"device_id": device_id, "device_name": device_name, "device_type": device_type}
-
-                json_array.append(tmp_json)  # Append current details (device) to the array
-                logger.info(json_array)
-            response_code = status.HTTP_200_OK
-            message = 'success'
-            value = json_array  # Set the final json array to 'value'
-
-        return Response(build_json_response(message, value), status=response_code)
+            raise NotFound()
 
 
 class ForgotPasswordView(APIView):

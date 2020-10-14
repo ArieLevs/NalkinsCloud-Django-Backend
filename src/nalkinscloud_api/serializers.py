@@ -1,6 +1,7 @@
 
 # REST API
 from rest_framework import serializers
+from nalkinscloud_mosquitto.models import Device, CustomerDevice
 
 
 class RegistrationSerializer(serializers.Serializer):
@@ -72,3 +73,20 @@ class SetScheduledJobSerializer(serializers.Serializer):
 class DelScheduledJobSerializer(serializers.Serializer):
     device_id = serializers.CharField(required=True, max_length=256)
     job_id = serializers.CharField(required=True, max_length=256)
+
+
+class DeviceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Device
+        fields = ('device_id', 'is_enabled', 'model', 'type', 'date_created')
+        depth = 1
+
+
+class CustomerDeviceSerializer(serializers.ModelSerializer):
+    # get a device using DeviceSerializer, later add it to this serialized
+    device = DeviceSerializer(source="device_id", many=False)
+
+    class Meta:
+        model = CustomerDevice
+        fields = ('user_id', 'device')
