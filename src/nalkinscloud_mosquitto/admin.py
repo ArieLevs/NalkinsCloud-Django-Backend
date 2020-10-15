@@ -37,7 +37,7 @@ class CustomDevicesAdmin(UserAdmin):
 
 @admin.register(CustomerDevice)
 class CustomDevicesAdmin(admin.ModelAdmin):
-    list_display = ('user_id', 'device_id', 'device_name')
+    list_display = ('user_id', 'device_id', 'device_name', 'is_owner')
     ordering = ('user_id',)
     pass
 

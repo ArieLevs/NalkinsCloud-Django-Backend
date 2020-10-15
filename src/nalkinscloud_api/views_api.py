@@ -1,11 +1,13 @@
 import logging
 from ipware.ip import get_client_ip
+from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import get_object_or_404
 
 from nalkinscloud_django.settings import FRONTEND_DOMAIN, EMAIL_HOST_USER
 from nalkinscloud_api.scheduler import schedule_new_job, remove_job_by_id
 from nalkinscloud_mosquitto.functions import insert_into_access_list, is_device_id_exists, \
-    insert_new_client_to_devices, is_device_owned_by_user, device_has_any_owner, \
-    insert_into_customer_devices, update_device_pass, remove_from_customer_devices, remove_from_access_list
+    insert_new_client_to_devices, is_device_owned_by_user, \
+    update_device_pass, remove_from_customer_devices, remove_from_access_list
 from nalkinscloud_mosquitto.models import Device, CustomerDevice
 from nalkinscloud_api.functions import build_json_response, is_client_secret_exists, is_email_exists, \
     generate_user_name, generate_random_8_char_string, hash_pbkdf2_sha256_password, get_utc_datetime
@@ -20,7 +22,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, UpdateAPIView
 from rest_framework.exceptions import NotFound
 
 from django.contrib.auth.forms import PasswordResetForm
@@ -124,75 +126,57 @@ class RegistrationView(APIView):
         return Response(build_json_response(message, value), status=response_code)
 
 
-class DeviceActivationView(APIView):
+class DeviceActivationView(UpdateAPIView):
     permission_classes = (IsAuthenticated,)
+    serializer_class = DeviceActivationSerializer
+    model = Device
 
-    @staticmethod
-    def post(request):
-        serializer = DeviceActivationSerializer(data=request.data)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.device_id = None
+        self.device_name = None
 
+    def get_queryset(self):
+        return get_object_or_404(self.model, device_id=self.device_id)
+
+    def put(self, request, *args, **kwargs):
+        serializer = DeviceActivationSerializer(data=self.request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            logger.info("New DeviceActivation request")
 
-            data = serializer.data
-            logger.info("Request Parameters: " + str(data))
+        self.device_id = serializer.data['device_id']
+        self.device_name = serializer.data['device_name']
 
-            device_id_string = data['device_id']
-            device_name = data['device_name']
+        # get the device that's being activated
+        device = self.get_queryset()
 
-            if not is_device_id_exists(device_id_string):
-                message = 'failed'
-                value = 'Device does not exists'
-                response_code = status.HTTP_204_NO_CONTENT
-                logger.error("Device does not exists")
-            else:
-                # Get token from request
-                token = request.auth
-                email = token.user
-                user = User.objects.get(email=email)
-                user_device = Device.objects.get(device_id=email)
-                device = Device.objects.get(device_id=device_id_string)
+        # get users device (type user, model application)
+        try:
+            user_device = Device.objects.get(device_id=self.request.user)
+        except ObjectDoesNotExist:
+            logger.error('mqtt device for {} was not found, '
+                         'it should of been generated on registration,'
+                         ' but missing from db at this point.'.format(self.request.user))
+            return Response('device activation failed', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-                logger.info("Current logged in user: " + str(email) + " ID is: " + str(user))
+        # create or update current device, with user in request
+        new_customer_device, created = CustomerDevice.objects.update_or_create(
+            user_id=self.request.user, device_id=device,
+            defaults={'device_name': self.device_name, 'is_owner': True}
+        )
 
-                # Check if the activated device is new (never got activated)
-                # or the original username is activating his device again
-                if is_device_owned_by_user(device, user):
-                    message = 'success'
-                    value = 'device already activated'
-                    response_code = status.HTTP_200_OK
-                    logger.error("Device already activated")
-                else:
-                    if device_has_any_owner(device):
-                        message = 'failed'
-                        value = 'Device already associated'
-                        response_code = status.HTTP_409_CONFLICT
-                        logger.error("Device already associated")
-                    else:
-                        logger.info("All checks passed, activating device")
+        logger.info("customer device {} completed, created: {}".format(
+            new_customer_device, created
+        ))
 
-                        # Insert the device into 'customer_devices' table
-                        if not insert_into_customer_devices(user, device, device_name):
-                            message = 'failed'
-                            value = 'Device Activation Failed'
-                            response_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-                            logger.error('Failed to add new device to customers_devices table')
-                        else:
-                            logger.info("insert_into_customer_devices completed")
+        # Build the topic, combined with userId + deviceId
+        topic = self.device_id + "/#"
+        # Insert the device into 'access_list' table
+        insert_into_access_list(device, topic)
+        insert_into_access_list(user_device, topic)
+        logger.info("insert_into_access_list_mosquitto_db completed")
 
-                            # Build the topic, combined with userId + deviceId
-                            topic = data['device_id'] + "/#"
-                            # Insert the device into 'access_list' table
-                            insert_into_access_list(device, topic)
-                            insert_into_access_list(user_device, topic)
-                            logger.info("insert_into_access_list_mosquitto_db completed")
-
-                            message = 'success'
-                            value = 'Activation successfully completed'
-                            response_code = status.HTTP_200_OK
-            return Response(build_json_response(message, value), status=response_code)
+        return Response('activation successfully completed', status=status.HTTP_200_OK)
 
 
 class DeviceListView(ListAPIView):

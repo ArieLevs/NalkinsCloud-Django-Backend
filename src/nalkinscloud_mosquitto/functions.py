@@ -75,19 +75,22 @@ def device_has_any_owner(device):
     return False
 
 
-def insert_into_customer_devices(user, device, device_name):
+def insert_into_customer_devices(user, device, device_name, owner=False):
     """
+    Create new customer device,
+    if owner is True, then model will also set current
     Create a new owner for a device (create new record),
     Return True if new CustomerDevice instance created, else return False
 
     :param user: User instance
     :param device: Device instance
     :param device_name: string
+    :param owner: boolean
     :return: boolean
     """
-    new_customer_device, created = CustomerDevice.objects.get_or_create(user_id=user, device_id=device)
+    new_customer_device, created = CustomerDevice.objects.get_or_create(user_id=user, device_id=device,
+                                                                        device_name=device_name, is_owner=owner)
     if created:
-        new_customer_device.device_name = device_name
         new_customer_device.save()
         return True
     return False  # The device already exists in the DB

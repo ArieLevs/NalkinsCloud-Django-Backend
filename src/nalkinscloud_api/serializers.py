@@ -79,7 +79,7 @@ class DeviceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Device
-        fields = ('device_id', 'is_enabled', 'model', 'type', 'date_created')
+        fields = ('device_id', 'model', 'type',)
         depth = 1
 
 

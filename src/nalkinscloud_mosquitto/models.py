@@ -1,3 +1,4 @@
+from datetime import timedelta, datetime, timezone
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -96,6 +97,13 @@ class Device(AbstractBaseUser):
 class CustomerDevice(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     device_id = models.ForeignKey(Device, on_delete=models.CASCADE)
+    is_owner = models.BooleanField(
+        _('Ownership Status'),
+        default=False,
+        help_text=_('Define if current user is the owner of current device.'),
+    )
+    __original_is_owner = None
+    is_owner_status_updated_at = models.DateTimeField(null=True, editable=False)
     device_name = models.CharField(_('Device Name'), max_length=32, null=False)
     date_created = models.DateTimeField(_('Date Created'),  auto_now_add=True, blank=True)
 
@@ -107,6 +115,21 @@ class CustomerDevice(models.Model):
         verbose_name = _('customer_device')
         verbose_name_plural = _('customer_device')
         db_table = 'customer_device'
+
+    def save(self, *args, **kwargs):
+        # check if there is a change is the is_owner field
+        if self.is_owner != self.__original_is_owner:
+            # update timestamp
+            self.is_owner_status_updated_at = datetime.now(tz=timezone.utc)
+
+        # allow exactly single 'is_owner=True' value per 'device/user'
+        if self.is_owner:
+            # get all customer devices of current saved device_id that have the is_owner True value, and set it to False
+            CustomerDevice.objects.filter(device_id=self.device_id, is_owner=True).update(is_owner=False)
+
+        # save new is_owner state to __original_is_owner for future checks
+        self.__original_is_owner = self.is_owner
+        super(CustomerDevice, self).save(*args, **kwargs)
 
     def get_user_id(self):
         return self.user_id
