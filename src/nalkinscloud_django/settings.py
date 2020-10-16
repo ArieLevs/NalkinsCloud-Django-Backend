@@ -157,7 +157,7 @@ USE_TZ = True
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
-        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -244,9 +244,9 @@ AUTHENTICATION_BACKENDS = (
 EMAIL_USE_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get('email_host')
-EMAIL_PORT = os.environ.get('email_port')
-EMAIL_HOST_USER = os.environ.get('email_username')
-EMAIL_HOST_PASSWORD = os.environ.get('email_password')
+EMAIL_PORT = int(os.environ.get('email_port'))
+EMAIL_HOST_USER = str(os.environ.get('email_username'))
+EMAIL_HOST_PASSWORD = str(os.environ.get('email_password'))
 
 DJANGO_EMAIL_VERIFIER_EXPIRE_TIME = 24  # In Hours
 

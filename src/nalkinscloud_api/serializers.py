@@ -1,15 +1,68 @@
+import logging
+from ipware.ip import get_client_ip
 
 # REST API
 from rest_framework import serializers
+
+from django.contrib.auth import get_user_model  # If used custom user model
+from django.conf import settings
+from django.urls import reverse
+
 from nalkinscloud_mosquitto.models import Device, CustomerDevice
+from nalkinscloud_api.functions import generate_user_name
+from nalkinscloud_api.api_exceptions import CustomException
+from nalkinscloud_mosquitto.functions import insert_into_access_list, insert_new_client_to_devices
+
+User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
-class RegistrationSerializer(serializers.Serializer):
-    client_secret = serializers.CharField(required=True, max_length=256)
-    email = serializers.CharField(required=True, max_length=256)
-    password = serializers.CharField(required=True, max_length=100)
-    first_name = serializers.CharField(required=True, max_length=100)
-    last_name = serializers.CharField(required=True, max_length=100)
+class RegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('email', 'password', 'first_name', 'last_name',)
+        write_only_fields = ('password',)
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            email=validated_data['email'], password=validated_data['password'],
+            first_name=validated_data['first_name'], last_name=validated_data['last_name'],
+            user_name=generate_user_name(validated_data['first_name'], validated_data['last_name']),
+        )
+
+        client_ip, is_routable = get_client_ip(self.context['request'])
+        if client_ip is None:
+            client_ip = '0.0.0.0'
+        logger.info('new registration attempt from {}'.format(client_ip))
+
+        logger.info('setting up MQTT broker db info')
+        # Add new "device" (customer) to the devices table
+        if not insert_new_client_to_devices(validated_data['email'], validated_data['password'], client_ip):
+            logger.error('failed to add {} record to devices table'.format(validated_data['email']))
+            # default exception is error 500
+            raise CustomException(detail=None, field=None)
+        else:
+            # Insert the customer into 'access_list' table, with topic of: email/#
+            device = Device.objects.get(device_id=validated_data['email'])
+            insert_into_access_list(device, validated_data['email'] + "/#")
+
+            logger.info("Setting up verification process")
+            user.save()
+
+            user.create_verification_email()
+
+            subject = 'Verify your NalkinsCloud account'
+            body = 'Follow this link to verify your account: ' + settings.FRONTEND_DOMAIN + '{}'.format(
+                reverse('nalkinscloud_ui:verify_account', kwargs={'verification_uuid': str(user.get_uuid_of_email())})
+            )
+
+            user.send_verification_email(subject=subject,
+                                         body=body,
+                                         from_mail=settings.EMAIL_HOST_USER)
+
+            logger.info('user {} successfully registered'.format(user))
+
+        return user
 
 
 class DeviceActivationSerializer(serializers.Serializer):
@@ -51,7 +104,6 @@ class RepeatedDaysSerializer(serializers.Serializer):
     saturday = serializers.BooleanField(required=True)
 
 
-
 class RepeatedJobSerializer(serializers.Serializer):
     repeat_job = serializers.BooleanField(required=True)
     repeat_days = RepeatedDaysSerializer(source='*')
@@ -76,7 +128,6 @@ class DelScheduledJobSerializer(serializers.Serializer):
 
 
 class DeviceSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Device
         fields = ('device_id', 'model', 'type',)

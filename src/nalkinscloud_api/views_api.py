@@ -2,16 +2,15 @@ import logging
 from ipware.ip import get_client_ip
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
 
-from nalkinscloud_django.settings import FRONTEND_DOMAIN, EMAIL_HOST_USER
 from nalkinscloud_api.scheduler import schedule_new_job, remove_job_by_id
 from nalkinscloud_mosquitto.functions import insert_into_access_list, is_device_id_exists, \
-    insert_new_client_to_devices, is_device_owned_by_user, \
+    is_device_owned_by_user, \
     update_device_pass, remove_from_customer_devices, remove_from_access_list
 from nalkinscloud_mosquitto.models import Device, CustomerDevice
 from nalkinscloud_api.functions import build_json_response, is_client_secret_exists, is_email_exists, \
-    generate_user_name, generate_random_8_char_string, hash_pbkdf2_sha256_password, get_utc_datetime
-from django_user_email_extension.models import User
+    generate_random_8_char_string, hash_pbkdf2_sha256_password, get_utc_datetime
 
 # Import serializers
 from nalkinscloud_api.serializers import RegistrationSerializer, DeviceActivationSerializer, ForgotPasswordSerializer, \
@@ -22,11 +21,12 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView, UpdateAPIView
+from rest_framework.generics import ListAPIView, UpdateAPIView, CreateAPIView
 from rest_framework.exceptions import NotFound
 
 from django.contrib.auth.forms import PasswordResetForm
-from django.urls import reverse
+
+User = get_user_model()
 
 # Define logger
 logger = logging.getLogger(__name__)
@@ -51,79 +51,10 @@ class HealthCheckView(APIView):
         return Response(build_json_response(message, email), status=status.HTTP_200_OK)
 
 
-class RegistrationView(APIView):
+class RegistrationView(CreateAPIView):
     permission_classes = ()  # No Authentication needed here
-
-    @staticmethod
-    def post(request):
-        serializer = RegistrationSerializer(data=request.data)
-
-        # Check format and unique constraint
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        logger.info("New Registration request")
-
-        data = serializer.data
-        logger.info("Request Parameters: " + str(data))
-
-        client_ip, is_routable = get_client_ip(request)
-        if client_ip is None:
-            client_ip = '0.0.0.0'
-
-        # Get CLIENT_SECRET from DB ( if user is using a verified software
-        if not is_client_secret_exists(data['client_secret']):
-            message = 'failed'
-            value = 'Application could not be verified'
-            response_code = status.HTTP_401_UNAUTHORIZED
-        else:
-            if is_email_exists(data['email']):  # Check if email already exists
-                message = 'failed'
-                value = 'Email already exists'
-                response_code = status.HTTP_409_CONFLICT
-                logger.error('%s - Email already exists', data['email'])
-            else:
-
-                # Create new django user
-                new_user = User.objects.create_user(data['email'],
-                                                    data['password'])
-
-                new_user.first_name = data['first_name']
-                new_user.last_name = data['last_name']
-                new_user.user_name = generate_user_name(data['first_name'], data['last_name'])
-
-                logger.info("Setting up MQTT broker db info")
-                # Add new "device" (customer) to the devices table
-                if not insert_new_client_to_devices(data['email'], data['password'], client_ip):
-                    message = 'failed'
-                    value = 'Registration Error occur'
-                    response_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-                    logger.error('Failed to add %s record to devices table', data['email'])
-                else:
-                    # Insert the customer into 'access_list' table, with topic of: email/#
-                    device = Device.objects.get(device_id=data['email'])
-                    insert_into_access_list(device, data['email'] + "/#")
-
-                    new_user.registration_ip = client_ip
-                    new_user.is_active = False
-                    new_user.save()
-
-                    logger.info("Setting up verification process")
-                    new_user.create_verification_email()
-
-                    subject = 'Verify your NalkinsCloud account'
-                    body = 'Follow this link to verify your account: ' + \
-                           FRONTEND_DOMAIN + '%s' % reverse('nalkinscloud_api:verify_account',
-                                                            kwargs={'uuid': str(new_user.get_uuid_of_email())})
-
-                    new_user.send_verification_email(subject=subject,
-                                                     body=body,
-                                                     from_mail=EMAIL_HOST_USER)
-                    message = 'success'
-                    value = 'Registered!'
-                    response_code = status.HTTP_201_CREATED
-                    logger.info("success Registered!")
-        return Response(build_json_response(message, value), status=response_code)
+    serializer_class = RegistrationSerializer
+    queryset = User.objects.all()
 
 
 class DeviceActivationView(UpdateAPIView):
