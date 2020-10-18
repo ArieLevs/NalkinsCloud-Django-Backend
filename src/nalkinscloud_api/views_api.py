@@ -478,32 +478,18 @@ class DelScheduledJobView(APIView):
             return Response(build_json_response(message, value), status=status.HTTP_200_OK)
 
 
-class UpdateMQTTUserPassView(APIView):
+class UpdateMQTTUserPassView(UpdateAPIView):
     permission_classes = (IsAuthenticated,)
+    model = Device
 
-    @staticmethod
-    def post(request):
-        logger.info("UpdateMQTTUserPass request")
+    def get_queryset(self):
+        return get_object_or_404(self.model, device_id=self.request.user)
 
-        # Get token from request
-        token = request.auth
-        email = token.user
-        user_id = token.user_id
-
-        logger.info("Current logged in user: " + str(email) + " ID is: " + str(user_id))
-
-        # If all passed OK, update customer "device" pass
-        if update_device_pass(email, token):
-            # Return user name
-            message = 'success'
-            value = str(email)
-            response_code = status.HTTP_200_OK
-        else:
-            message = 'failed'
-            value = 'update device pass failed'
-            response_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-
-        return Response(build_json_response(message, value), status=response_code)
+    def put(self, request, *args, **kwargs):
+        device = self.get_queryset()
+        device.set_password(request.auth.token)
+        device.save()
+        return Response('device pass update was successful', status=status.HTTP_200_OK)
 
 
 class SetScheduledJobView2(APIView):
