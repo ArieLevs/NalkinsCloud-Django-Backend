@@ -99,16 +99,16 @@ class DevicePassUpdateView(UpdateAPIView):
                 )
                 return Response('device pass update failed', status=status.HTTP_409_CONFLICT)
             device.set_password(request.auth.token)
-
+            device.save()
+            return Response('device pass update was successful', status=status.HTTP_200_OK)
         else:
             customer_device = CustomerDevice.objects.get(user_id=self.request.user, device_id=device)
             if not customer_device.is_owner:
                 logger.error("User {} is not the owner of device {}".format(self.request.user, device))
                 return Response('device pass update failed', status=status.HTTP_409_CONFLICT)
-            else:
-                # Generate the password (8 characters long mixed digits with letters)
-                new_password = generate_random_8_char_string()
-                device.set_password(new_password)
 
-        device.save()
-        return Response('device pass update was successful', status=status.HTTP_200_OK)
+            # Generate the password (8 characters long mixed digits with letters)
+            new_password = generate_random_8_char_string()
+            device.set_password(new_password)
+            device.save()
+            return Response({'password': new_password}, status=status.HTTP_200_OK)
