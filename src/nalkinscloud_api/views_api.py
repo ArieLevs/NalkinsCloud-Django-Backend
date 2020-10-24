@@ -10,7 +10,8 @@ from nalkinscloud_api.functions import build_json_response, is_client_secret_exi
 
 # Import serializers
 from nalkinscloud_api.serializers import RegistrationSerializer, ForgotPasswordSerializer, \
-    DeviceSerializer, ResetPasswordSerializer, SetScheduledJobSerializer
+    ResetPasswordSerializer, SetScheduledJobSerializer
+from nalkinscloud_api.serializers_devices import DeviceSerializer
 
 # REST Framework
 from rest_framework.response import Response

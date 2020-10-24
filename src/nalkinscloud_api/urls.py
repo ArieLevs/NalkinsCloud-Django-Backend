@@ -19,8 +19,7 @@ urlpatterns = [
 
     # Devices api
     path('customer_device/<str:c_device_id>/', views_devices_api.CustomerDevicesView.as_view(), name='customer_device'),
-    path('device_activation/', views_devices_api.DeviceActivationView.as_view(), name='device_activation'),
+    path('device_activation/', views_devices_api.CustomerDeviceCreateView.as_view(), name='device_activation'),
     path('device_list/', views_devices_api.DeviceListView.as_view(), name='device_list'),
     path('get_device_pass/', views_devices_api.GetDevicePassView.as_view(), name='get_device_pass'),
-    path('remove_device/', views_devices_api.RemoveCustomerDeviceView.as_view(), name='remove_device'),
 ]

@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model  # If used custom user model
 from django.conf import settings
 from django.urls import reverse
 
-from nalkinscloud_mosquitto.models import Device, CustomerDevice
+from nalkinscloud_mosquitto.models import Device
 from nalkinscloud_api.functions import generate_user_name
 from nalkinscloud_api.api_exceptions import CustomException
 from nalkinscloud_mosquitto.functions import insert_into_access_list, insert_new_client_to_devices
@@ -65,11 +65,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return user
 
 
-class DeviceActivationSerializer(serializers.Serializer):
-    device_id = serializers.CharField(required=True, max_length=256)
-    device_name = serializers.CharField(required=True, max_length=256)
-
-
 class ForgotPasswordSerializer(serializers.Serializer):
     client_secret = serializers.CharField(required=True, max_length=256)
     email = serializers.CharField(required=True, max_length=256)
@@ -120,19 +115,3 @@ class SetScheduledJobSerializer(serializers.Serializer):
 class DelScheduledJobSerializer(serializers.Serializer):
     device_id = serializers.CharField(required=True, max_length=256)
     job_id = serializers.CharField(required=True, max_length=256)
-
-
-class DeviceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Device
-        fields = ('device_id', 'model', 'type',)
-        depth = 1
-
-
-class CustomerDeviceSerializer(serializers.ModelSerializer):
-    # get a device using DeviceSerializer, later add it to this serialized
-    device = DeviceSerializer(source="device_id", many=False)
-
-    class Meta:
-        model = CustomerDevice
-        fields = ('user_id', 'device')

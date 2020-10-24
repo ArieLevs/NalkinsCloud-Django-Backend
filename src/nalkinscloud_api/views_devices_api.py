@@ -1,23 +1,24 @@
 import logging
-from django.core.exceptions import ObjectDoesNotExist
+
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
-from nalkinscloud_mosquitto.functions import insert_into_access_list, is_device_id_exists, \
+from nalkinscloud_mosquitto.functions import is_device_id_exists, \
     is_device_owned_by_user, \
     update_device_pass, remove_from_customer_devices, remove_from_access_list
-from nalkinscloud_mosquitto.models import Device, CustomerDevice
+from nalkinscloud_mosquitto.models import CustomerDevice
 from nalkinscloud_api.functions import build_json_response, generate_random_8_char_string, hash_pbkdf2_sha256_password
 
 # Import serializers
-from nalkinscloud_api.serializers import DeviceActivationSerializer, DeviceSerializer, CustomerDeviceSerializer
+from nalkinscloud_api.serializers_devices import CustomerDeviceCreateSerializer, DeviceSerializer, \
+    CustomerDeviceSerializer
 
 # REST Framework
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView, UpdateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.exceptions import NotFound
 
 User = get_user_model()
@@ -67,57 +68,10 @@ class CustomerDevicesView(RetrieveUpdateDestroyAPIView):
         return Response(serializer.data)
 
 
-class DeviceActivationView(UpdateAPIView):
+class CustomerDeviceCreateView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = DeviceActivationSerializer
-    model = Device
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.device_id = None
-        self.device_name = None
-
-    def get_queryset(self):
-        return get_object_or_404(self.model, device_id=self.device_id)
-
-    def put(self, request, *args, **kwargs):
-        serializer = DeviceActivationSerializer(data=self.request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        self.device_id = serializer.data['device_id']
-        self.device_name = serializer.data['device_name']
-
-        # get the device that's being activated
-        device = self.get_queryset()
-
-        # get users device (type user, model application)
-        try:
-            user_device = Device.objects.get(device_id=self.request.user)
-        except ObjectDoesNotExist:
-            logger.error('mqtt device for {} was not found, '
-                         'it should of been generated on registration,'
-                         ' but missing from db at this point.'.format(self.request.user))
-            return Response('device activation failed', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        # create or update current device, with user in request
-        new_customer_device, created = CustomerDevice.objects.update_or_create(
-            user_id=self.request.user, device_id=device,
-            defaults={'device_name': self.device_name, 'is_owner': True}
-        )
-
-        logger.info("customer device {} completed, created: {}".format(
-            new_customer_device, created
-        ))
-
-        # Build the topic, combined with userId + deviceId
-        topic = self.device_id + "/#"
-        # Insert the device into 'access_list' table
-        insert_into_access_list(device, topic)
-        insert_into_access_list(user_device, topic)
-        logger.info("insert_into_access_list_mosquitto_db completed")
-
-        return Response('activation successfully completed', status=status.HTTP_200_OK)
+    serializer_class = CustomerDeviceCreateSerializer
+    # queryset = CustomerDevice.objects.all()
 
 
 class DeviceListView(ListAPIView):
