@@ -74,11 +74,6 @@ class ForgotPasswordSerializer(serializers.Serializer):
     client_secret = serializers.CharField(required=True, max_length=256)
     email = serializers.CharField(required=True, max_length=256)
 
-
-class DeviceIdOnlySerializer(serializers.Serializer):
-    device_id = serializers.CharField(required=True, max_length=256)
-
-
 class ResetPasswordSerializer(serializers.Serializer):
     current_password = serializers.CharField(required=True, max_length=256)
     new_password = serializers.CharField(required=True, max_length=256)
