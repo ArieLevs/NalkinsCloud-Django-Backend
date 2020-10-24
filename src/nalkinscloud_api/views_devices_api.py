@@ -3,22 +3,18 @@ import logging
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
-from nalkinscloud_mosquitto.functions import is_device_id_exists, \
-    is_device_owned_by_user, \
-    update_device_pass, remove_from_customer_devices, remove_from_access_list
-from nalkinscloud_mosquitto.models import CustomerDevice
-from nalkinscloud_api.functions import build_json_response, generate_random_8_char_string, hash_pbkdf2_sha256_password
+from nalkinscloud_mosquitto.functions import update_device_pass, remove_from_customer_devices, remove_from_access_list
+from nalkinscloud_mosquitto.models import CustomerDevice, Device
+from nalkinscloud_api.functions import generate_random_8_char_string, hash_pbkdf2_sha256_password
 
 # Import serializers
-from nalkinscloud_api.serializers_devices import CustomerDeviceCreateSerializer, DeviceSerializer, \
-    CustomerDeviceSerializer
+from nalkinscloud_api.serializers_devices import CustomerDeviceCreateSerializer, CustomerDeviceSerializer
 
 # REST Framework
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView, UpdateAPIView
 from rest_framework.exceptions import NotFound
 
 User = get_user_model()
@@ -87,61 +83,32 @@ class DeviceListView(ListAPIView):
             raise NotFound()
 
 
-class GetDevicePassView(APIView):
+class DevicePassUpdateView(UpdateAPIView):
     permission_classes = (IsAuthenticated,)
+    queryset = Device.objects.all()
+    lookup_field = 'device_id'
 
-    @staticmethod
-    def post(request):
-        serializer = DeviceSerializer(data=request.data)
+    def update(self, request, *args, **kwargs):
+        device = self.get_object()
 
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if device.type.type == 'user':
+            # make sure user is updating his own devices password
+            if device.device_id != self.request.user.email:
+                logger.error("User {} is trying to update another users device password {}".format(
+                    self.request.user, device)
+                )
+                return Response('device pass update failed', status=status.HTTP_409_CONFLICT)
+            device.set_password(request.auth.token)
+
         else:
-            logger.info("New GetDevicePass request")
-
-            data = serializer.data
-            logger.info("Request Parameters: " + str(data))
-
-            device_id = data['device_id']
-
-            if not is_device_id_exists(device_id):
-                message = 'failed'
-                value = 'Device does not exists'
-                logger.info("Device " + device_id + "does not exists")
-                response_code = status.HTTP_204_NO_CONTENT
+            customer_device = CustomerDevice.objects.get(user_id=self.request.user, device_id=device)
+            if not customer_device.is_owner:
+                logger.error("User {} is not the owner of device {}".format(self.request.user, device))
+                return Response('device pass update failed', status=status.HTTP_409_CONFLICT)
             else:
-                # Get token from request
-                token = request.auth
-                email = token.user
-                user = User.objects.get(email=email)
+                # Generate the password (8 characters long mixed digits with letters)
+                new_password = generate_random_8_char_string()
+                device.set_password(new_password)
 
-                logger.info("Current logged in user: " + str(email) + " ID is: " + str(user))
-
-                # Check if the activated device is new (never got activated)
-                # or the original user is activating his device again
-                if not is_device_owned_by_user(device_id, user):
-                    message = 'failed'
-                    value = 'User is not the owner'
-                    logger.info("User is not the owner")
-                    response_code = status.HTTP_409_CONFLICT
-                else:
-                    logger.info("All checks passed, generating hashed pass")
-                    # Generate the password (8 characters long mixed digits with letters)
-                    # The 'newPassword' should be returned to the app
-                    new_password = generate_random_8_char_string()
-
-                    # update the pass into the DB,
-                    # send device ID, pass and the device name that the user choose
-                    # NOTE - password is being hashed on device.save def
-                    if update_device_pass(device_id, new_password):
-                        message = 'success'
-                        value = new_password
-                        logger.info("Password updated")
-                        response_code = status.HTTP_200_OK
-                    else:
-                        message = 'failed'
-                        value = 'Password Update Failed'
-                        logger.info("Password Update Failed")
-                        response_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-
-            return Response(build_json_response(message, value), status=response_code)
+        device.save()
+        return Response('device pass update was successful', status=status.HTTP_200_OK)

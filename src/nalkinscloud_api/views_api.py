@@ -295,20 +295,6 @@ class DelScheduledJobView(APIView):
             return Response(build_json_response(message, value), status=status.HTTP_200_OK)
 
 
-class UpdateMQTTUserPassView(UpdateAPIView):
-    permission_classes = (IsAuthenticated,)
-    model = Device
-
-    def get_queryset(self):
-        return get_object_or_404(self.model, device_id=self.request.user)
-
-    def put(self, request, *args, **kwargs):
-        device = self.get_queryset()
-        device.set_password(request.auth.token)
-        device.save()
-        return Response('device pass update was successful', status=status.HTTP_200_OK)
-
-
 class SetScheduledJobView2(APIView):
     permission_classes = (IsAuthenticated,)
 
